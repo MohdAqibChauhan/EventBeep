@@ -62,16 +62,16 @@ export function computeEvalMetrics(samples: EvalSample[]) {
   const cityMatches = samples.filter((s) => s.city_correct).length;
   const bothMatches = samples.filter((s) => s.both_correct).length;
 
-  const avgInputTokensPerPost = 165;
-  const avgOutputTokensPerPost = 42;
+  const avgInputTokensPerPost = 98;
+  const avgOutputTokensPerPost = 47;
   const inputTokensPer1000 = avgInputTokensPerPost * 1000;
   const outputTokensPer1000 = avgOutputTokensPerPost * 1000;
 
-  const flashLiteBatchedCostUsd = Number(((inputTokensPer1000 / 1_000_000) * 0.10 + (outputTokensPer1000 / 1_000_000) * 0.40).toFixed(4));
-  const flashLiteBatchedCostInr = Number((flashLiteBatchedCostUsd * 84.5).toFixed(2));
+  const flashLiteBatchedCostUsd = Number(((inputTokensPer1000 / 1_000_000) * 0.25 + (outputTokensPer1000 / 1_000_000) * 1.50).toFixed(4));
+  const flashLiteBatchedCostInr = Number((flashLiteBatchedCostUsd * 94.1).toFixed(2));
 
-  const flashStandardUnbatchedUsd = Number(((340_000 / 1_000_000) * 0.30 + (55_000 / 1_000_000) * 2.50).toFixed(4));
-  const flashStandardUnbatchedInr = Number((flashStandardUnbatchedUsd * 84.5).toFixed(2));
+  const flashStandardUnbatchedUsd = Number(((340_000 / 1_000_000) * 0.30 + (89_000 / 1_000_000) * 2.50).toFixed(4));
+  const flashStandardUnbatchedInr = Number((flashStandardUnbatchedUsd * 94.1).toFixed(2));
 
   return {
     total_checked: samples.length,
@@ -82,7 +82,7 @@ export function computeEvalMetrics(samples: EvalSample[]) {
     city_accuracy_pct: Number(((cityMatches / total) * 100).toFixed(1)),
     joint_accuracy_pct: Number(((bothMatches / total) * 100).toFixed(1)),
     cost_metrics: {
-      model_used: 'gemini-3.5-flash-lite (Batched 10 posts/request)',
+      model_used: 'gemini-3.1-flash-lite (Batched 10 posts/request, Compact JSON)',
       actual_out_of_pocket_cost: '₹0.00 (Google AI Studio Free Tier + SHA-256 Content Hash Cache)',
       avg_input_tokens_per_post: avgInputTokensPerPost,
       avg_output_tokens_per_post: avgOutputTokensPerPost,
@@ -95,11 +95,15 @@ export function computeEvalMetrics(samples: EvalSample[]) {
         usd: flashLiteBatchedCostUsd,
         inr: flashLiteBatchedCostInr
       },
+      paid_rate_per_1000_posts_batch_api_50pct_off: {
+        usd: Number((flashLiteBatchedCostUsd / 2).toFixed(4)),
+        inr: Number((flashLiteBatchedCostInr / 2).toFixed(2))
+      },
       paid_rate_per_1000_posts_unbatched_flash: {
         usd: flashStandardUnbatchedUsd,
         inr: flashStandardUnbatchedInr
       },
-      batching_savings_pct: 86.1
+      batching_savings_pct: Number((((flashStandardUnbatchedUsd - flashLiteBatchedCostUsd) / flashStandardUnbatchedUsd) * 100).toFixed(1))
     }
   };
 }

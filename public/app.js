@@ -2542,8 +2542,8 @@ async function loadAdminOverview() {
       ) +
       renderKpiBox(
         'COST PER 1,000 JOBS',
-        `₹${latestRun.cost_per_1000_inr || 2.81} <span style="font-size:0.95rem; font-weight:700;">($${latestRun.cost_per_1000_usd || 0.0333})</span>`,
-        `₹${(((latestRun.tagged || data.tagged_jobs || 300) * 2.81) / 1000).toFixed(2)} for ${latestRun.tagged || data.tagged_jobs || 300} jobs · ₹0 on Free Tier`
+        `₹${latestRun.cost_per_1000_inr || 8.94} <span style="font-size:0.95rem; font-weight:700;">($${latestRun.cost_per_1000_usd || 0.095})</span>`,
+        `₹${(((latestRun.tagged || data.tagged_jobs || 300) * 8.94) / 1000).toFixed(2)} for ${latestRun.tagged || data.tagged_jobs || 300} jobs · ₹4.47 via Batch API · ₹0 Free Tier`
       );
   }
 
@@ -2552,8 +2552,8 @@ async function loadAdminOverview() {
     runsBody.innerHTML = (data.runs || [])
       .map((r) => {
         const taggedCount = Number(r.tagged || 300);
-        const runCostUsd = Number(((taggedCount * 0.0333) / 1000).toFixed(4));
-        const runCostInr = Number(((taggedCount * 2.81) / 1000).toFixed(2));
+        const runCostUsd = Number(((taggedCount * 0.095) / 1000).toFixed(4));
+        const runCostInr = Number(((taggedCount * 8.94) / 1000).toFixed(2));
         return `
       <tr>
         <td><strong>#${r.id}</strong></td>
@@ -2561,7 +2561,7 @@ async function loadAdminOverview() {
         <td>${r.fetched} jobs</td>
         <td><strong>${taggedCount} unique jobs</strong></td>
         <td><strong>${r.duplicates_removed} removed</strong></td>
-        <td><strong>₹${runCostInr} ($${runCostUsd})</strong><br/><span style="font-size:0.7rem; color:#666;">@ ₹2.81 / 1k jobs</span></td>
+        <td><strong>₹${runCostInr} ($${runCostUsd})</strong><br/><span style="font-size:0.7rem; color:#666;">@ ₹8.94 / 1k jobs</span></td>
         <td>${(r.duration_ms / 1000).toFixed(1)}s</td>
         <td>${timeAgo(r.finished_at)}</td>
       </tr>
@@ -2676,8 +2676,8 @@ function renderEvalView() {
     ) +
     renderKpiBox(
       'COST PER 1,000 JOBS',
-      '₹2.81 ($0.0333)',
-      '165 in + 42 out tokens/job · ₹0 Free Tier'
+      '₹8.94 ($0.095)',
+      '98 in + 47 out tokens/job · ₹4.47 Batch API · ₹0 Free Tier'
     );
 
   const filteredSamples =

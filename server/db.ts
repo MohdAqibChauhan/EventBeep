@@ -198,9 +198,9 @@ export function buildPipelineRunRecord(params: {
   outTokens?: number;
 }): PipelineRun {
   const { id, startMs, trigger, collected, totalTagged } = params;
-  const inputTokens = params.inTokens || totalTagged * 165;
-  const outputTokens = params.outTokens || totalTagged * 42;
-  const costUsd = Number(((inputTokens / 1_000_000) * 0.10 + (outputTokens / 1_000_000) * 0.40).toFixed(4));
+  const inputTokens = params.inTokens || totalTagged * 98;
+  const outputTokens = params.outTokens || totalTagged * 47;
+  const costUsd = Number(((inputTokens / 1_000_000) * 0.25 + (outputTokens / 1_000_000) * 1.50).toFixed(4));
 
   return {
     id,
@@ -218,8 +218,8 @@ export function buildPipelineRunRecord(params: {
     input_tokens: inputTokens,
     output_tokens: outputTokens,
     cost_usd: costUsd,
-    cost_per_1000_usd: 0.0333,
-    cost_per_1000_inr: 2.81,
+    cost_per_1000_usd: 0.095,
+    cost_per_1000_inr: 8.94,
     duration_ms: Date.now() - startMs,
     notes: `Refreshed ${collected.fetchedCount} raw posts across ${collected.sourcesQueried.length} public boards, removed ${collected.duplicates.length} duplicates across 3 layers, and tagged ${totalTagged} unique India fresher/internship roles.`
   };
@@ -423,7 +423,7 @@ export async function initStore(): Promise<StoreSchema> {
       next_refresh_at: nextRefresh.toISOString(),
       cron_schedule: '0 6 * * * (Daily at 06:00 AM IST)',
       pg_connected: pgConnected,
-      llm_model: process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
+      llm_model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite'
     }
   };
 

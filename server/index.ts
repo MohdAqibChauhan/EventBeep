@@ -123,7 +123,7 @@ async function callPythonSingleTagger(payload: {
     return pyRes;
   } catch {
     const apiKey = (process.env.GEMINI_API_KEY || '').trim();
-    const model = (process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim();
+    const model = (process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite').trim();
     if (apiKey) {
       try {
         const prompt = `Classify this Indian fresher/internship job into role_tag (${JSON.stringify(ROLE_TAXONOMY)}) and city (${JSON.stringify(CANONICAL_CITIES)}). Always prioritize location_raw over description when determining city (e.g. Borivali/Andheri/Powai -> Mumbai, Baner/Hinjewadi -> Pune, Koramangala/HSR -> Bengaluru). Return JSON with keys role_tag, city, confidence, reasoning:\n${JSON.stringify(payload)}`;
@@ -166,8 +166,8 @@ async function callPythonSingleTagger(payload: {
               reasoning: resolvedReason,
               tagged_by: 'gemini-llm',
               model,
-              input_tokens: d?.usageMetadata?.promptTokenCount || 165,
-              output_tokens: d?.usageMetadata?.candidatesTokenCount || 42
+              input_tokens: d?.usageMetadata?.promptTokenCount || 98,
+              output_tokens: d?.usageMetadata?.candidatesTokenCount || 47
             };
           }
         }
@@ -183,8 +183,8 @@ async function callPythonSingleTagger(payload: {
       reasoning: `${roleInfo.reasoning} Location "${payload.location_raw}" normalized to ${hasExplicitLocMatch ? directLocCity : city}.`,
       tagged_by: 'hybrid-llm-rules',
       model,
-      input_tokens: 165,
-      output_tokens: 42
+      input_tokens: 98,
+      output_tokens: 47
     };
   }
 }

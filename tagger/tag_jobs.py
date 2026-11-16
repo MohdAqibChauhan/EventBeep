@@ -79,15 +79,20 @@ def call_gemini_batch(jobs_batch: list[dict], api_key: str, model: str) -> tuple
         {
             "id": j.get("id", idx),
             "title": j.get("title", ""),
-            "company": j.get("company", ""),
             "location_raw": j.get("location_raw", ""),
-            "description": (j.get("description", "") or "")[:350],
+            "description": (j.get("description", "") or "")[:300],
         }
         for idx, j in enumerate(jobs_batch)
     ]
-    user_prompt = f"Classify these {len(items_payload)} Indian fresher/internship jobs into role_tag and city:\n{json.dumps(items_payload, ensure_ascii=False)}"
+    compact_prompt = (
+        f"Tag Indian fresher/internship jobs into role_tag ({json.dumps(ROLE_TAXONOMY)}) "
+        f"and city ({json.dumps(CANONICAL_CITIES)}). Map Baner/Hinjewadi->Pune, "
+        f"Borivali/Andheri/Powai->Mumbai, HSR/Koramangala->Bengaluru, Gurugram/Noida->Delhi NCR. "
+        f"Return JSON array of {{id, role_tag, city, confidence}} only."
+    )
+    user_prompt = json.dumps(items_payload, ensure_ascii=False)
     req_body = {
-        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "systemInstruction": {"parts": [{"text": compact_prompt}]},
         "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
         "generationConfig": {
             "temperature": 0.1,
@@ -99,8 +104,8 @@ def call_gemini_batch(jobs_batch: list[dict], api_key: str, model: str) -> tuple
     with urllib.request.urlopen(req, timeout=15) as resp:
         resp_json = json.loads(resp.read().decode("utf-8"))
         usage = resp_json.get("usageMetadata", {})
-        in_tok = int(usage.get("promptTokenCount", len(jobs_batch) * 165))
-        out_tok = int(usage.get("candidatesTokenCount", len(jobs_batch) * 42))
+        in_tok = int(usage.get("promptTokenCount", len(jobs_batch) * 98))
+        out_tok = int(usage.get("candidatesTokenCount", len(jobs_batch) * 47))
         text = resp_json["candidates"][0]["content"]["parts"][0]["text"]
         parsed = json.loads(text)
         if isinstance(parsed, dict) and "results" in parsed:
@@ -110,7 +115,7 @@ def call_gemini_batch(jobs_batch: list[dict], api_key: str, model: str) -> tuple
 def tag_single_job(payload: dict) -> dict:
     load_env()
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite").strip()
 
     title = payload.get("title", "")
     company = payload.get("company", "")
@@ -160,8 +165,8 @@ def tag_single_job(payload: dict) -> dict:
         "reasoning": f"[Python Tagger] {reason} Normalized '{location_raw}' -> '{city}'.",
         "tagged_by": "hybrid-llm-rules",
         "model": model,
-        "input_tokens": 165,
-        "output_tokens": 42,
+        "input_tokens": 98,
+        "output_tokens": 47,
     }
 
 def run_batch_store_tagger():
@@ -176,7 +181,7 @@ def run_batch_store_tagger():
 
     jobs = store.get("jobs", [])
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite").strip()
 
     start_time = time.time()
     tagged_count = 0
@@ -193,12 +198,12 @@ def run_batch_store_tagger():
             j["llm_reasoning"] = reason
             j["status"] = "tagged"
         tagged_count += 1
-        total_in_tokens += 165
-        total_out_tokens += 42
+        total_in_tokens += 98
+        total_out_tokens += 47
 
-    cost_usd = round((total_in_tokens / 1_000_000) * 0.10 + (total_out_tokens / 1_000_000) * 0.40, 4)
-    cost_per_1000_usd = round(((165_000 / 1_000_000) * 0.10 + (42_000 / 1_000_000) * 0.40), 4)
-    cost_per_1000_inr = round(cost_per_1000_usd * 84.5, 2)
+    cost_usd = round((total_in_tokens / 1_000_000) * 0.25 + (total_out_tokens / 1_000_000) * 1.50, 4)
+    cost_per_1000_usd = round(((98_000 / 1_000_000) * 0.25 + (47_000 / 1_000_000) * 1.50), 4)
+    cost_per_1000_inr = round(cost_per_1000_usd * 94.1, 2)
 
     store["meta"]["last_refresh_at"] = datetime.now(timezone.utc).isoformat()
     with open(store_path, "w", encoding="utf-8") as f:

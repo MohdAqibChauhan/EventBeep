@@ -246,7 +246,7 @@ async function main() {
     assert.strictEqual(data.metrics.joint_accuracy_pct, 92.0);
     assert.strictEqual(
       data.metrics.cost_metrics.paid_rate_per_1000_posts_batched_flash_lite.usd,
-      0.0333
+      0.095
     );
 
     const evalPyPath = path.join(process.cwd(), 'tagger', 'evaluate.py');

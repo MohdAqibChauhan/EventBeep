@@ -658,8 +658,8 @@
                 <tr>
                   <td><strong>3</strong></td>
                   <td><strong>Older Gemini model version was retired for new keys</strong></td>
-                  <td>Calling <code>gemini-2.5-flash-lite</code> with a new AI Studio key returned a <code>404 Not Found</code> error asking to upgrade to <code>gemini-3.5-flash-lite</code>.</td>
-                  <td>Upgraded our Python AI worker to <strong>Gemini 3.5 Flash-Lite</strong> and batched 10 jobs per call, reducing token usage by <strong>86.1%</strong>.</td>
+                  <td>Calling <code>gemini-2.5-flash-lite</code> with a new AI Studio key returned a <code>404 Not Found</code> error.</td>
+                  <td>Upgraded our Python AI worker to <strong>Gemini 3.1 Flash-Lite</strong>, batched 10 jobs per call, and trimmed output JSON to <strong>98 in + 47 out tokens/job</strong> (<strong>₹8.94</strong> standard / <strong>₹4.47</strong> Batch API per 1,000 jobs).</td>
                 </tr>
                 <tr>
                   <td><strong>4</strong></td>
@@ -774,7 +774,7 @@ Given a batch of Indian fresher / college internship job postings, classify each
 
   <div id="action-feedback-toast" class="hidden" style="position:fixed; bottom:24px; right:24px; z-index:9999; background:#171722; color:#FFE01B; border:2px solid #FFE01B; border-radius:12px; padding:12px 18px; font-weight:800; font-size:0.86rem; box-shadow:0 8px 24px rgba(0,0,0,0.35);"></div>
 
-  <script src="/seed-data.js?v=4"></script>
-  <script src="/app.js?v=4"></script>
+  <script src="/seed-data.js?v=5"></script>
+  <script src="/app.js?v=5"></script>
 </body>
 </html>
