@@ -29,7 +29,8 @@
     "Indore",
     "Chandigarh",
     "Remote (India)",
-    "Pan-India / Multiple"
+    "Pan-India / Multiple",
+    "International / Global"
   ],
   "city_aliases": [
     { "pattern": "\\b(bengaluru|bangalore|blr|whitefield|koramangala|hsr|hsr layout|electronic city|indiranagar|bellandur|marathahalli|sarjapur|jayanagar|jp nagar|btm|hebbal|manyata|yelahanka|malleshwaram|rajajinagar|banashankari|domlur|mg road|bagmane|mahadevapura|kr puram|brookefield|kadubeesanahalli|ecospace|peenya|yeswanthpur|kengeri|bommanahalli|madiwala|nagawara|thanisandra|hennur|banaswadi|kalyan nagar)\\b", "city": "Bengaluru" },
@@ -44,6 +45,7 @@
     { "pattern": "\\b(kochi|cochin|infopark|kakkanad|ernakulam|edappally|aluva|kaloor|mg road kochi|trivandrum|thiruvananthapuram|technopark|kazhakkoottam)\\b", "city": "Kochi" },
     { "pattern": "\\b(indore|bhopal|vijay nagar|palasia|bhawarkua|super corridor|rajwada|mp nagar|arera colony)\\b", "city": "Indore" },
     { "pattern": "\\b(chandigarh|mohali|panchkula|tricity|zirakpur|it park chandigarh|phase 8 mohali|sector 17|sector 34)\\b", "city": "Chandigarh" },
+    { "pattern": "\\b(usa|united states|new york|nyc|manhattan|brooklyn|san francisco|bay area|silicon valley|palo alto|mountain view|sunnyvale|cupertino|menlo park|san jose|seattle|redmond|austin|boston|chicago|los angeles|dallas|atlanta|denver|miami|washington dc|uk|united kingdom|england|london|manchester|edinburgh|cambridge|oxford|birmingham|uae|dubai|abu dhabi|sharjah|singapore|germany|berlin|munich|frankfurt|hamburg|canada|toronto|vancouver|montreal|waterloo|ottawa|calgary|australia|sydney|melbourne|brisbane|perth|japan|tokyo|osaka|netherlands|amsterdam|rotterdam|eindhoven|france|paris|lyon|ireland|dublin|cork|switzerland|zurich|geneva|spain|madrid|barcelona|italy|milan|rome|sweden|stockholm|poland|warsaw|krakow|brazil|sao paulo|mexico|south korea|seoul|hong kong|taiwan|taipei|malaysia|kuala lumpur|indonesia|jakarta|vietnam|ho chi minh|hanoi|thailand|bangkok|philippines|manila|israel|tel aviv|saudi arabia|riyadh|jeddah|qatar|doha|new zealand|auckland|europe|emea|apac|latam|international|overseas|abroad)\\b", "city": "International / Global" },
     { "pattern": "\\b(pan[- ]?india|multiple locations|anywhere in india|all india)\\b", "city": "Pan-India / Multiple" },
     { "pattern": "\\b(remote|work from home|wfh|anywhere)\\b", "city": "Remote (India)" }
   ],

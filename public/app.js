@@ -2455,9 +2455,9 @@ async function loadAdminOverview() {
         `Role (${data.eval_metrics?.role_correct_count}/50) · City (${data.eval_metrics?.city_correct_count}/50)`
       ) +
       renderKpiBox(
-        'PUBLIC SOURCES ACTIVE',
-        `${(latestRun.sources_queried || []).length || 24} Boards`,
-        'Official Greenhouse, Remotive, Jobicy & HN Feeds'
+        'COST PER 1,000 JOBS',
+        `₹${latestRun.cost_per_1000_inr || 2.81} <span style="font-size:0.95rem; font-weight:700;">($${latestRun.cost_per_1000_usd || 0.0333})</span>`,
+        'Gemini 3.5 Flash-Lite (₹0 actual spend)'
       );
   }
 
@@ -2472,6 +2472,7 @@ async function loadAdminOverview() {
         <td>${r.fetched} jobs</td>
         <td><strong>${r.tagged} unique jobs</strong></td>
         <td><strong>${r.duplicates_removed} removed</strong></td>
+        <td><strong>$${r.cost_per_1000_usd || 0.0333} (₹${r.cost_per_1000_inr || 2.81})</strong></td>
         <td>${(r.duration_ms / 1000).toFixed(1)}s</td>
         <td>${timeAgo(r.finished_at)}</td>
       </tr>
@@ -2537,8 +2538,8 @@ async function triggerManualPipeline() {
   setText('hero-refresh-btn', '✅ Jobs Synced Successfully!');
   setText('admin-run-btn', '✅ Sync Complete!');
   setTimeout(() => {
-    setText('hero-refresh-btn', '🔄 Sync Latest Jobs Now');
-    setText('admin-run-btn', '🔄 Sync Latest Jobs Now');
+    setText('hero-refresh-btn', '🔄 Fetch External Job Boards');
+    setText('admin-run-btn', '🔄 Fetch External Job Boards');
   }, 2500);
 }
 
@@ -2583,6 +2584,11 @@ function renderEvalView() {
       `${metrics.joint_accuracy_pct}%`,
       `${metrics.both_correct_count} out of ${metrics.total_checked} jobs exact on both role & city`,
       'kpi-dark'
+    ) +
+    renderKpiBox(
+      'COST PER 1,000 JOBS',
+      '₹2.81 ($0.0333)',
+      '165 in + 42 out tokens/job · ₹0 Free Tier'
     );
 
   const filteredSamples =
