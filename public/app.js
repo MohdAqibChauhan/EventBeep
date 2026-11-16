@@ -536,7 +536,8 @@ async function loadNextPageOnScroll() {
     work_mode: state.filters.work_mode,
     sort: state.filters.sort,
     page: String(state.filters.page),
-    limit: String(state.filters.limit)
+    limit: String(state.filters.limit),
+    viewer_role: state.currentUser?.role || 'user'
   });
 
   try {
@@ -842,7 +843,8 @@ async function loadJobs() {
     work_mode: state.filters.work_mode,
     sort: state.filters.sort,
     page: String(state.filters.page),
-    limit: String(state.filters.limit)
+    limit: String(state.filters.limit),
+    viewer_role: state.currentUser?.role || 'user'
   });
 
   const data = await apiGet(`/api/jobs?${params.toString()}`);
@@ -936,8 +938,10 @@ function renderJobCard(job, isRecruiterManage = false, isLiveInjected = false) {
       </a>
     `;
   } else if (role === 'recruiter' || isRecruiterManage) {
+    const views = job.views_count ?? 0;
+    const applies = job.apply_clicks ?? 0;
     actionButtonsHtml = `
-      <span class="meta-item" style="font-size:0.72rem;">👁️ ${job.views_count || 18} views · 👥 ${job.apply_clicks || 4} applies</span>
+      <span class="meta-item" style="font-size:0.72rem;">👁️ ${views} ${views === 1 ? 'view' : 'views'} · 👥 ${applies} ${applies === 1 ? 'apply' : 'applies'}</span>
       <button class="btn-apply" onclick="filterRecruiterApplicants(${job.id})">👥 View Applicants</button>
       ${
         isRecruiterManage
@@ -1262,7 +1266,7 @@ async function submitRecruiterJob(e) {
   if (!ok) {
     box.innerHTML = `
       <div style="color:#991B1B; font-weight:800;">
-        ⚠️ This job is already listed on the board: ${escapeHtml(data.error)}
+        ⚠️ Already Listed: ${escapeHtml(data.error)}
       </div>
     `;
     return;

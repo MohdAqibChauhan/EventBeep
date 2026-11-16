@@ -205,6 +205,14 @@ app.get('/api/jobs', (req, res) => {
   const startIdx = (page - 1) * limit;
   const items = filtered.slice(startIdx, startIdx + limit);
 
+  const viewerRole = String(req.query.viewer_role || '');
+  if (viewerRole === 'user' && items.length > 0) {
+    for (const item of items) {
+      item.views_count = (item.views_count ?? 0) + 1;
+    }
+    saveStore(store);
+  }
+
   res.json({
     total_all_jobs: activeJobs.length,
     total_filtered: totalFiltered,
@@ -308,9 +316,13 @@ app.get('/api/user/applications', (req, res) => {
 app.get('/api/recruiter/applications', (req, res) => {
   const store = getStore();
   const jobId = Number(req.query.job_id || 0);
-  const apps = jobId
-    ? store.applications.filter((a) => a.job_id === jobId)
-    : store.applications;
+  if (!jobId) {
+    return res.json({ applications: store.applications });
+  }
+  const targetJob = store.jobs.find((j) => j.id === jobId);
+  const apps = store.applications.filter(
+    (a) => a.job_id === jobId || (targetJob && a.job_title === targetJob.title)
+  );
   res.json({ applications: apps });
 });
 
@@ -441,9 +453,17 @@ app.post('/api/jobs/:id/report-tag', (req, res) => {
 
 app.get('/api/recruiter/jobs', (_req, res) => {
   const store = getStore();
-  const recruiterJobs = store.jobs.filter(
-    (j) => j.source === 'EventBeep Direct Recruiter' || j.posted_by != null
-  );
+  const recruiterJobs = store.jobs
+    .filter((j) => j.source === 'EventBeep Direct Recruiter' || j.posted_by != null)
+    .map((j) => {
+      const directApps = store.applications.filter(
+        (a) => a.job_id === j.id || a.job_title === j.title
+      ).length;
+      const views = Math.max(j.views_count ?? 0, directApps);
+      j.apply_clicks = directApps;
+      j.views_count = views;
+      return j;
+    });
   res.json({ jobs: recruiterJobs });
 });
 
@@ -494,7 +514,7 @@ app.post('/api/recruiter/jobs', async (req, res) => {
 
   if (dupeCheck.isDuplicate && dupeCheck.matchedJob) {
     return res.status(409).json({
-      error: `Duplicate detected via ${dupeCheck.layer}! Matches existing listing "${dupeCheck.matchedJob.title}" at ${dupeCheck.matchedJob.company} (ID #${dupeCheck.matchedJob.id}).`,
+      error: `We found an existing post for "${dupeCheck.matchedJob.title}" at ${dupeCheck.matchedJob.company} in ${dupeCheck.matchedJob.city}, so we prevented a duplicate listing.`,
       duplicate_layer: dupeCheck.layer,
       matched_job: dupeCheck.matchedJob
     });
@@ -537,7 +557,7 @@ app.post('/api/recruiter/jobs', async (req, res) => {
     is_fresher: true,
     posted_by: 2,
     has_external_url: hasExternalUrl,
-    views_count: 1,
+    views_count: 0,
     apply_clicks: 0
   };
 
