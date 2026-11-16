@@ -377,19 +377,19 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>Job or Internship Title *</label>
-                <input type="text" id="rec-title" class="form-control" placeholder="e.g. Gen AI & Full-Stack Intern" value="Gen AI & Full-Stack Intern (2026 Batch)" required />
+                <input type="text" id="rec-title" class="form-control" placeholder="e.g. Gen AI & Full-Stack Intern (2026 Batch)" />
               </div>
               <div class="form-group">
                 <label>Company Name *</label>
-                <input type="text" id="rec-company" class="form-control" placeholder="e.g. Beep Careers" value="Beep Careers" required />
+                <input type="text" id="rec-company" class="form-control" placeholder="e.g. Beep Careers or Your Startup Name" />
               </div>
               <div class="form-group">
-                <label>Location (Area or City, e.g. Baner, Pune or Bengaluru) *</label>
-                <input type="text" id="rec-location" class="form-control" placeholder="e.g. Baner, Pune (Hybrid)" value="Baner, Pune (Hybrid)" required />
+                <label>Location (Area or City, e.g. Andheri, Mumbai / Baner, Pune / Bengaluru) *</label>
+                <input type="text" id="rec-location" class="form-control" placeholder="e.g. Andheri, Mumbai or Baner, Pune (Hybrid)" />
               </div>
               <div class="form-group">
                 <label>Monthly Stipend or Annual CTC</label>
-                <input type="text" id="rec-stipend" class="form-control" placeholder="e.g. ₹35,000 / month or ₹10 LPA" value="₹35,000 - ₹50,000 / month" />
+                <input type="text" id="rec-stipend" class="form-control" placeholder="e.g. ₹35,000 - ₹50,000 / month or ₹10 LPA" />
               </div>
               <div class="form-group">
                 <label>Job Type</label>
@@ -400,17 +400,17 @@
               </div>
               <div class="form-group">
                 <label>Key Skills (Comma separated)</label>
-                <input type="text" id="rec-skills" class="form-control" placeholder="Python, TypeScript, React, SQL" value="Python, TypeScript, Gemini AI, PostgreSQL" />
+                <input type="text" id="rec-skills" class="form-control" placeholder="e.g. Python, TypeScript, React, SQL, Figma" />
               </div>
               <div class="form-group" style="grid-column: 1 / -1;">
                 <label>External Application Website (Optional — Leave blank if you don't have a company website; students will apply directly on Beep and you will see all their contact details in 'Student Applicants')</label>
-                <input type="url" id="rec-url" class="form-control" placeholder="Leave blank to collect student applications & contact details directly on Beep" />
+                <input type="url" id="rec-url" class="form-control" placeholder="e.g. https://yourcompany.com/careers (or leave blank to collect applications on Beep)" />
               </div>
             </div>
 
             <div class="form-group">
               <label>Job Description & Responsibilities *</label>
-              <textarea id="rec-desc" rows="3" class="form-control" placeholder="Describe what the fresher or intern will work on..." required>Build AI-powered career tools, data pipelines, and web applications for college students across India.</textarea>
+              <textarea id="rec-desc" rows="3" class="form-control" placeholder="e.g. Build AI-powered web applications, collaborate with product & design teams, and ship features for college students..."></textarea>
             </div>
 
             <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
@@ -727,41 +727,41 @@ Given a batch of Indian fresher / college internship job postings, classify each
     <div class="modal-box" style="max-width:560px;">
       <h3 style="font-family:var(--font-display); font-weight:900; margin-bottom:4px;">⚡ Apply Directly on Beep</h3>
       <p style="font-size:0.84rem; color:#444; margin-bottom:14px;" id="apply-modal-job-label"></p>
-      <form onsubmit="submitDirectApplication(event)" novalidate>
+      <form id="student-apply-form" onsubmit="submitDirectApplication(event)" novalidate>
         <input type="hidden" id="apply-job-id" />
         <div class="form-grid">
           <div class="form-group">
             <label>Your Full Name *</label>
-            <input type="text" id="apply-name" class="form-control" value="Mohdaqib Chauhan" />
+            <input type="text" id="apply-name" class="form-control" placeholder="e.g. Rohan Deshmukh" />
           </div>
           <div class="form-group">
             <label>Email Address *</label>
-            <input type="email" id="apply-email" class="form-control" value="student@eventbeep.com" />
+            <input type="email" id="apply-email" class="form-control" placeholder="e.g. rohan@college.edu" />
           </div>
           <div class="form-group">
             <label>Phone / WhatsApp Number *</label>
-            <input type="text" id="apply-phone" class="form-control" value="+91 98230 45120" />
+            <input type="text" id="apply-phone" class="form-control" placeholder="e.g. +91 98230 45120" />
           </div>
           <div class="form-group">
             <label>Graduation Year *</label>
-            <input type="text" id="apply-grad-year" class="form-control" value="2026" />
+            <input type="text" id="apply-grad-year" class="form-control" placeholder="e.g. 2026" />
           </div>
         </div>
         <div class="form-group">
           <label>College / University *</label>
-          <input type="text" id="apply-college" class="form-control" value="Pune Institute of Computer Technology (PICT)" />
+          <input type="text" id="apply-college" class="form-control" placeholder="e.g. PICT Pune / COEP / VIT" />
         </div>
         <div class="form-group">
           <label>Resume, Portfolio, or GitHub Link *</label>
-          <input type="url" id="apply-resume" class="form-control" value="https://github.com/mohdaqib" />
+          <input type="url" id="apply-resume" class="form-control" placeholder="e.g. https://github.com/yourusername or Google Drive link" />
         </div>
         <div class="form-group">
           <label>Your Key Skills</label>
-          <input type="text" id="apply-skills" class="form-control" value="TypeScript, Node.js, Python, Gemini AI, PostgreSQL" />
+          <input type="text" id="apply-skills" class="form-control" placeholder="e.g. TypeScript, Node.js, Python, React, SQL" />
         </div>
         <div class="form-group">
           <label>Short Note to the Recruiter *</label>
-          <textarea id="apply-note" rows="2" class="form-control">Hi! I have strong hands-on experience with these skills and would love to contribute to your team.</textarea>
+          <textarea id="apply-note" rows="2" class="form-control" placeholder="e.g. Hi! I have strong hands-on experience with these skills and would love to contribute to your team."></textarea>
         </div>
         <div id="apply-error-msg" class="hidden" style="background:#FEF2F2; border:1.5px solid #DC2626; border-radius:10px; padding:10px 12px; color:#991B1B; font-weight:700; font-size:0.82rem; margin-bottom:12px;"></div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
@@ -774,7 +774,7 @@ Given a batch of Indian fresher / college internship job postings, classify each
 
   <div id="action-feedback-toast" class="hidden" style="position:fixed; bottom:24px; right:24px; z-index:9999; background:#171722; color:#FFE01B; border:2px solid #FFE01B; border-radius:12px; padding:12px 18px; font-weight:800; font-size:0.86rem; box-shadow:0 8px 24px rgba(0,0,0,0.35);"></div>
 
-  <script src="/seed-data.js"></script>
-  <script src="/app.js"></script>
+  <script src="/seed-data.js?v=3"></script>
+  <script src="/app.js?v=3"></script>
 </body>
 </html>

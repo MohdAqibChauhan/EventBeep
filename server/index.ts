@@ -112,7 +112,13 @@ async function callPythonSingleTagger(payload: {
     const pyRes = JSON.parse(stdout.trim());
     if (hasExplicitLocMatch && pyRes.city !== directLocCity) {
       pyRes.city = directLocCity;
-      pyRes.reasoning = `Role classified as ${pyRes.role_tag}; location "${payload.location_raw}" normalized directly to ${directLocCity}.`;
+    }
+    if (
+      !pyRes.reasoning ||
+      pyRes.reasoning.length > 150 ||
+      /wait,\s*let's|if allowed|re-read/i.test(pyRes.reasoning)
+    ) {
+      pyRes.reasoning = `Classified as ${pyRes.role_tag} based on job title and skills; location "${payload.location_raw}" normalized to ${pyRes.city}.`;
     }
     return pyRes;
   } catch {
@@ -145,10 +151,14 @@ async function callPythonSingleTagger(payload: {
               ? item.city
               : normalizeCity(payload.location_raw, payload.description).city;
             const resolvedCity = hasExplicitLocMatch ? directLocCity : llmCity;
+            const rawReason = String(item.reasoning || '');
             const resolvedReason =
-              hasExplicitLocMatch && llmCity !== directLocCity
-                ? `Role classified as ${resolvedRole}; location "${payload.location_raw}" normalized directly to ${resolvedCity}.`
-                : item.reasoning || 'Tagged live via Gemini AI.';
+              !rawReason ||
+              rawReason.length > 150 ||
+              /wait,\s*let's|if allowed|re-read/i.test(rawReason) ||
+              (hasExplicitLocMatch && llmCity !== directLocCity)
+                ? `Classified as ${resolvedRole} based on job title and skills; location "${payload.location_raw}" normalized to ${resolvedCity}.`
+                : rawReason;
             return {
               role_tag: resolvedRole,
               city: resolvedCity,
@@ -731,7 +741,9 @@ app.post('/api/recruiter/jobs', async (req, res) => {
     experience_required,
     skills,
     auto_approve,
-    posted_by
+    posted_by,
+    override_role_tag,
+    override_city
   } = req.body || {};
 
   const cleanTitle = String(title || '').trim();
@@ -765,6 +777,13 @@ app.post('/api/recruiter/jobs', async (req, res) => {
     location_raw: cleanLocation,
     description: String(description || '')
   });
+
+  if (override_role_tag && ROLE_TAXONOMY.includes(String(override_role_tag))) {
+    tagResult.role_tag = String(override_role_tag);
+  }
+  if (override_city && CANONICAL_CITIES.includes(String(override_city))) {
+    tagResult.city = String(override_city);
+  }
 
   const { work_mode } = normalizeCity(String(location_raw), String(description || ''));
   const hasExternalUrl = Boolean(url && String(url).trim().startsWith('http'));

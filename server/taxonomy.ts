@@ -1,12 +1,14 @@
 import taxonomyData from '../config/taxonomy.json';
 
-export const ROLE_TAXONOMY: string[] = taxonomyData.roles;
+const rawTaxonomy: any = (taxonomyData as any)?.default || taxonomyData;
+
+export const ROLE_TAXONOMY: string[] = rawTaxonomy.roles;
 export type CanonicalRole = string;
 
-export const CANONICAL_CITIES: string[] = taxonomyData.cities;
+export const CANONICAL_CITIES: string[] = rawTaxonomy.cities;
 export type CanonicalCity = string;
 
-const CITY_ALIASES: Array<{ pattern: RegExp; city: string }> = taxonomyData.city_aliases.map(
+const CITY_ALIASES: Array<{ pattern: RegExp; city: string }> = rawTaxonomy.city_aliases.map(
   (entry: { pattern: string; city: string }) => ({
     pattern: new RegExp(entry.pattern, 'i'),
     city: entry.city
@@ -14,7 +16,7 @@ const CITY_ALIASES: Array<{ pattern: RegExp; city: string }> = taxonomyData.city
 );
 
 const ROLE_RULES: Array<{ pattern: RegExp; role: string; confidence: number; reason: string }> =
-  taxonomyData.role_rules.map((r: { pattern: string; role: string; confidence: number; reason: string }) => ({
+  rawTaxonomy.role_rules.map((r: { pattern: string; role: string; confidence: number; reason: string }) => ({
     pattern: new RegExp(r.pattern, 'i'),
     role: r.role,
     confidence: r.confidence,

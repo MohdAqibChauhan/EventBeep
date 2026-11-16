@@ -328,8 +328,44 @@ function computeClientEvalMetrics(eval50) {
   };
 }
 
+const BUILTIN_CITY_ALIASES = [
+  { pattern: '\\b(bengaluru|bangalore|blr|whitefield|koramangala|hsr|hsr layout|electronic city|indiranagar|bellandur|marathahalli|sarjapur|jayanagar|jp nagar|btm|hebbal|manyata|yelahanka|malleshwaram|rajajinagar|banashankari|domlur|ulsoor|mg road|bagmane|mahadevapura|kr puram|brookefield|kadubeesanahalli|ecospace|peenya|yeswanthpur|kengeri|bommanahalli|madiwala|nagawara|thanisandra|hennur|banaswadi|kalyan nagar)\\b', city: 'Bengaluru' },
+  { pattern: '\\b(pune|baner|balewadi|hinjewadi|hinjawadi|wakad|aundh|pashan|bawdhan|bavdhan|kothrud|karve nagar|warje|sinhagad|deccan|shivajinagar|fc road|jm road|koregaon park|kalyani nagar|viman nagar|yerwada|kharadi|magarpatta|hadapsar|wadgaon sheri|wagholi|mundhwa|wanowrie|nibm|kondhwa|bibwewadi|katraj|swargate|pimpri|chinchwad|pcmc|akurdi|nigdi|bhosari|chakan|talawade|ravet|punawale|tathawade|pimple saudagar|pimple nilakh|pimple gurav|vishrantwadi|lohegaon|dhanori)\\b', city: 'Pune' },
+  { pattern: '\\b(mumbai|bombay|navi mumbai|thane|powai|andheri|bandra|lower parel|parel|goregaon|worli|bkc|borivali|kandivali|dahisar|malad|jogeshwari|vile parle|santacruz|khar|mahim|dadar|matunga|sion|wadala|mahalaxmi|byculla|colaba|churchgate|nariman point|fort|kurla|chembur|ghatkopar|vikhroli|vikroli|kanjurmarg|bhandup|mulund|chandivali|saki naka|marol|chakala|seepz|ghodbunder|kalyan|dombivli|vashi|sanpada|juinagar|nerul|seawoods|belapur|kharghar|kamothe|panvel|airoli|ghansoli|kopar khairane|turbhe|mahape|mira road|miraroad|bhayandar|vasai|virar|palghar)\\b', city: 'Mumbai' },
+  { pattern: '\\b(hyderabad|hyd|secunderabad|hitec city|hitech city|gachibowli|madhapur|kondapur|jubilee hills|banjara hills|begumpet|ameerpet|kukatpally|miyapur|manikonda|nanakramguda|financial district|raidurg|kokapet|uppal|pocharam|shamshabad|lb nagar|dilsukhnagar|himayatnagar|somajiguda|panjagutta)\\b', city: 'Hyderabad' },
+  { pattern: '\\b(delhi|new delhi|ncr|gurgaon|gurugram|noida|greater noida|faridabad|ghaziabad|cyber city|cyberhub|udyog vihar|golf course road|sohna road|manesar|dwarka|saket|connaught place|nehru place|okhla|jasola|lajpat nagar|hauz khas|green park|vasant kunj|vasant vihar|aerocity|janakpuri|rajouri garden|pitampura|rohini|mayur vihar|karol bagh)\\b', city: 'Delhi NCR' },
+  { pattern: '\\b(chennai|madras|guindy|omr|taramani|perungudi|sholinganallur|siruseri|thoraipakkam|velachery|adyar|thiruvanmiyur|t nagar|anna nagar|nungambakkam|mylapore|egmore|ambattur|porur|mount road)\\b', city: 'Chennai' },
+  { pattern: '\\b(kolkata|calcutta|salt lake|sector v|new town|rajarhat|howrah|park street|ballygunge|alipore|dum dum|behala|jadavpur|garia)\\b', city: 'Kolkata' },
+  { pattern: '\\b(ahmedabad|gandhinagar|gift city|sg highway|prahlad nagar|bodakdev|satellite|vastrapur|navrangpura|maninagar|bopal|cg road|ashram road)\\b', city: 'Ahmedabad' },
+  { pattern: '\\b(jaipur|sitapura|malviya nagar|mansarovar|vaishali nagar|c scheme|tonk road|jagatpura|vidhyadhar nagar|raja park)\\b', city: 'Jaipur' },
+  { pattern: '\\b(kochi|cochin|infopark|kakkanad|ernakulam|edappally|aluva|kaloor|mg road kochi|trivandrum|thiruvananthapuram|technopark|kazhakkoottam)\\b', city: 'Kochi' },
+  { pattern: '\\b(indore|bhopal|vijay nagar|palasia|bhawarkua|super corridor|rajwada|mp nagar|arera colony)\\b', city: 'Indore' },
+  { pattern: '\\b(chandigarh|mohali|panchkula|tricity|zirakpur|it park chandigarh|phase 8 mohali|sector 17|sector 34)\\b', city: 'Chandigarh' },
+  { pattern: '\\b(usa|united states|new york|nyc|manhattan|brooklyn|san francisco|bay area|silicon valley|palo alto|mountain view|sunnyvale|cupertino|menlo park|san jose|seattle|redmond|austin|boston|chicago|los angeles|dallas|atlanta|denver|miami|washington dc|uk|united kingdom|england|london|manchester|edinburgh|cambridge|oxford|birmingham|uae|dubai|abu dhabi|sharjah|singapore|germany|berlin|munich|frankfurt|hamburg|canada|toronto|vancouver|montreal|waterloo|ottawa|calgary|australia|sydney|melbourne|brisbane|perth|japan|tokyo|osaka|netherlands|amsterdam|rotterdam|eindhoven|france|paris|lyon|ireland|dublin|cork|switzerland|zurich|geneva|spain|madrid|barcelona|italy|milan|rome|sweden|stockholm|poland|warsaw|krakow|brazil|sao paulo|mexico|south korea|seoul|hong kong|taiwan|taipei|malaysia|kuala lumpur|indonesia|jakarta|vietnam|ho chi minh|hanoi|thailand|bangkok|philippines|manila|israel|tel aviv|saudi arabia|riyadh|jeddah|qatar|doha|new zealand|auckland|europe|emea|apac|latam|international|overseas|abroad)\\b', city: 'International / Global' },
+  { pattern: '\\b(pan[- ]?india|multiple locations|anywhere in india|all india)\\b', city: 'Pan-India / Multiple' },
+  { pattern: '\\b(remote|work from home|wfh|anywhere)\\b', city: 'Remote (India)' }
+];
+
+const BUILTIN_ROLE_RULES = [
+  { pattern: '\\b(ui/?ux|product design|graphic design|visual design|figma|interaction design|ux research|brand design)\\b', role: 'Product Design (UI/UX)', confidence: 0.96, reason: 'Matched UI/UX or Product Design signals.' },
+  { pattern: '\\b(data scien|machine learning|ai/?ml|gen\\s?ai|llm|deep learning|nlp|computer vision|ai engineer|data engineer|mlops)\\b', role: 'Data Science & AI/ML', confidence: 0.96, reason: 'Matched AI/ML, LLM, or Data Science signals.' },
+  { pattern: '\\b(android|ios|flutter|react native|mobile app|kotlin|swift)\\b', role: 'Mobile Development', confidence: 0.95, reason: 'Matched mobile engineering platform signals.' },
+  { pattern: '\\b(frontend|front-end|react\\.?js|next\\.?js|vue|angular|ui developer|web developer)\\b', role: 'Frontend & Web Dev', confidence: 0.94, reason: 'Matched Frontend or Web UI development signals.' },
+  { pattern: '\\b(backend|back-end|devops|cloud|sre|site reliability|node\\.?js|golang|java developer|python backend|platform engineer|aws|kubernetes)\\b', role: 'Backend & Cloud/DevOps', confidence: 0.94, reason: 'Matched Backend API or Cloud/DevOps signals.' },
+  { pattern: '\\b(qa|quality assurance|sdet|test engineer|automation test|manual test)\\b', role: 'QA & Testing', confidence: 0.95, reason: 'Matched QA, SDET, or Software Testing signals.' },
+  { pattern: '\\b(product manag|apm|associate product|product owner|product analyst)\\b', role: 'Product Management', confidence: 0.93, reason: 'Matched APM or Product Management signals.' },
+  { pattern: '\\b(content|copywrit|social media|video edit|creator|editorial|journalis|technical writ|community)\\b', role: 'Content & Social Media', confidence: 0.93, reason: 'Matched Content, Copywriting, or Social Media signals.' },
+  { pattern: '\\b(marketing|seo|performance market|growth|digital market|brand manag|pr )\\b', role: 'Marketing & Growth', confidence: 0.93, reason: 'Matched Growth, SEO, or Digital Marketing signals.' },
+  { pattern: '\\b(business develop|bda|bdr|sdr|sales|account executive|partnerships|inside sales|client servicing|representative)\\b', role: 'Business Development & Sales', confidence: 0.94, reason: 'Matched Business Development or Sales signals.' },
+  { pattern: '\\b(hr|human resource|talent acquisition|recruiter|people ops|campus hiring)\\b', role: 'HR & Talent', confidence: 0.95, reason: 'Matched HR or Talent Acquisition signals.' },
+  { pattern: '\\b(finance|financial|accountant|accounting|equity|investment|audit|tax|business analyst|data analyst|analytics)\\b', role: 'Finance & Analyst', confidence: 0.92, reason: 'Matched Finance, Accounting, or Analyst signals.' },
+  { pattern: '\\b(operations|founder\'?s office|strategy|project manag|supply chain|program manag|chief of staff|ops|specialist|support)\\b', role: 'Operations & Strategy', confidence: 0.92, reason: 'Matched Operations, Strategy, or Program Management signals.' },
+  { pattern: '\\b(software|sde|swe|full[- ]?stack|developer|engineer|programmer|coding|tech intern)\\b', role: 'Software Engineering', confidence: 0.93, reason: 'Matched Software Engineering signals.' }
+];
+
+let appliedSuggestedTags = null;
+
 function clientClassifyJob(title, locationRaw, description) {
-  const tax = window.BEEP_SEED_DATA?.taxonomy || { roles: [], cities: [], city_aliases: [], role_rules: [] };
   const rawLower = String(locationRaw || '').toLowerCase();
   const combined = `${rawLower} ${String(description || '').slice(0, 300).toLowerCase()}`;
   let work_mode = 'On-site';
@@ -337,7 +373,7 @@ function clientClassifyJob(title, locationRaw, description) {
   else if (/\b(remote|wfh|work from home)\b/i.test(rawLower)) work_mode = 'Remote';
 
   let city = '';
-  for (const alias of tax.city_aliases || []) {
+  for (const alias of BUILTIN_CITY_ALIASES) {
     const re = new RegExp(alias.pattern, 'i');
     if (re.test(rawLower)) {
       city = alias.city;
@@ -346,7 +382,7 @@ function clientClassifyJob(title, locationRaw, description) {
     }
   }
   if (!city) {
-    for (const alias of tax.city_aliases || []) {
+    for (const alias of BUILTIN_CITY_ALIASES) {
       const re = new RegExp(alias.pattern, 'i');
       if (re.test(combined)) {
         city = alias.city;
@@ -362,10 +398,10 @@ function clientClassifyJob(title, locationRaw, description) {
 
   let role_tag = 'Operations & Strategy';
   let confidence = 0.88;
-  let reasoning = `Matched based on job title and description keywords; location "${locationRaw}" normalized to ${city}.`;
+  let reasoning = `Classified based on job title and skills; location "${locationRaw}" normalized to ${city}.`;
   const tLower = String(title || '').toLowerCase();
   const dLower = String(description || '').toLowerCase();
-  for (const rule of tax.role_rules || []) {
+  for (const rule of BUILTIN_ROLE_RULES) {
     const re = new RegExp(rule.pattern, 'i');
     if (re.test(tLower)) {
       role_tag = rule.role;
@@ -375,7 +411,7 @@ function clientClassifyJob(title, locationRaw, description) {
     }
   }
   if (role_tag === 'Operations & Strategy') {
-    for (const rule of tax.role_rules || []) {
+    for (const rule of BUILTIN_ROLE_RULES) {
       const re = new RegExp(rule.pattern, 'i');
       if (re.test(dLower)) {
         role_tag = rule.role;
@@ -756,6 +792,8 @@ function handleClientFallbackApi(method, url, bodyObj = {}) {
       };
     }
     const tag = clientClassifyJob(cleanTitle, cleanLoc, bodyObj.description);
+    if (bodyObj.override_role_tag) tag.role_tag = bodyObj.override_role_tag;
+    if (bodyObj.override_city) tag.city = bodyObj.override_city;
     const normKey = `${cleanCompany.toLowerCase().replace(/[^a-z0-9]/g, '')}|${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}|${tag.city.toLowerCase()}`;
 
     const matched = store.jobs.find((j) => {
@@ -1554,15 +1592,6 @@ async function enterPortalWithUser(user, isReload = false) {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
 
-  const recCompEl = document.getElementById('rec-company');
-  if (recCompEl && user.role === 'recruiter') {
-    recCompEl.value = user.company || 'Beep Careers';
-  }
-  const applyCollegeEl = document.getElementById('apply-college');
-  if (applyCollegeEl && user.role === 'user' && user.college) {
-    applyCollegeEl.value = user.college;
-  }
-
   applyRoleLayout(user.role);
   await loadSavedJobs();
   await loadUserApplicationsList();
@@ -2028,17 +2057,13 @@ async function trackJobClick(jobId) {
 }
 
 function openApplyModal(jobId, title, company, city) {
+  const applyForm = document.getElementById('student-apply-form');
+  if (applyForm) applyForm.reset();
   document.getElementById('apply-job-id').value = jobId;
   setText(
     'apply-modal-job-label',
-    `Applying for ${title} at ${company} (${city}) — Your profile & contact details will be shared directly with the recruiter.`
+    `Applying for ${title} at ${company} (${city}) — Fill in your details below to share your profile directly with the recruiter.`
   );
-  const shortName = state.currentUser.name.split('(')[0].trim();
-  document.getElementById('apply-name').value = shortName;
-  document.getElementById('apply-email').value = state.currentUser.email || 'student@eventbeep.com';
-  if (state.currentUser.college) {
-    document.getElementById('apply-college').value = state.currentUser.college;
-  }
   const applyErr = document.getElementById('apply-error-msg');
   if (applyErr) applyErr.classList.add('hidden');
   document.getElementById('apply-modal').classList.add('open');
@@ -2104,6 +2129,8 @@ async function submitDirectApplication(e) {
     return;
   }
 
+  const applyForm = document.getElementById('student-apply-form');
+  if (applyForm) applyForm.reset();
   closeApplyModal();
   showFeedbackToast('🚀 Application submitted! The recruiter can now view your profile & contact details.');
   await loadUserApplicationsList();
@@ -2165,6 +2192,30 @@ async function switchTab(tabName) {
   }
 }
 
+function applySuggestedTags(roleTag, city) {
+  appliedSuggestedTags = { role_tag: roleTag, city };
+  const locEl = document.getElementById('rec-location');
+  if (locEl) {
+    const currentLoc = locEl.value.trim();
+    if (currentLoc && !currentLoc.toLowerCase().includes(city.toLowerCase()) && city !== 'Remote (India)') {
+      locEl.value = `${currentLoc}, ${city}`;
+    } else if (!currentLoc) {
+      locEl.value = city;
+    }
+  }
+  const badgeEl = document.getElementById('applied-tags-status');
+  if (badgeEl) {
+    badgeEl.innerHTML = `<span class="badge-ok" style="font-size:0.78rem;">✓ Tags Applied: ${escapeHtml(roleTag)} · 📍 ${escapeHtml(city)}</span>`;
+  }
+  showFeedbackToast(`✅ Applied AI Tags: ${roleTag} · ${city}`);
+}
+
+async function applyAndPublishSuggestedJob(roleTag, city) {
+  applySuggestedTags(roleTag, city);
+  const fakeEvent = { preventDefault: () => {} };
+  await submitRecruiterJob(fakeEvent);
+}
+
 async function previewLlmTagging() {
   const title = document.getElementById('rec-title').value.trim();
   const company = document.getElementById('rec-company').value.trim();
@@ -2183,7 +2234,7 @@ async function previewLlmTagging() {
     return;
   }
   if (!location_raw) {
-    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a Location (for example: Baner, Pune or Remote) to preview city normalization.</div>`;
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a Location (for example: Andheri, Mumbai or Baner, Pune) to preview city normalization.</div>`;
     return;
   }
 
@@ -2195,20 +2246,42 @@ async function previewLlmTagging() {
     return;
   }
 
+  const localFallback = clientClassifyJob(title, location_raw, description);
+  const finalRole = data.role_tag || localFallback.role_tag;
+  const finalCity =
+    localFallback.city !== 'Remote (India)' && data.city === 'Remote (India)'
+      ? localFallback.city
+      : data.city || localFallback.city;
+  const cleanReason =
+    !data.reasoning || data.reasoning.length > 150 || /wait,\s*let's|if allowed|re-read/i.test(data.reasoning)
+      ? `Classified as ${finalRole} based on job title and skills; location "${location_raw}" normalized to ${finalCity}.`
+      : data.reasoning;
+
+  const safeRole = escapeHtml(finalRole).replace(/'/g, "\\'");
+  const safeCity = escapeHtml(finalCity).replace(/'/g, "\\'");
+
   box.innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-      <div>
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div style="flex:1; min-width:260px;">
         <div style="font-family:var(--font-mono); font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#555;">
           ✨ AI SUGGESTED TAGS FOR YOUR JOB POST
         </div>
         <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <span class="tag-role-yellow">💼 Role: ${escapeHtml(data.role_tag)}</span>
-          <span class="tag-city-dark">📍 City: ${escapeHtml(data.city)}</span>
+          <span class="tag-role-yellow">💼 Role: ${escapeHtml(finalRole)}</span>
+          <span class="tag-city-dark">📍 City: ${escapeHtml(finalCity)}</span>
           <span class="tag-conf">✓ ${Math.round((data.confidence || 0.95) * 100)}% Match Confidence</span>
         </div>
         <div style="font-size:0.84rem; margin-top:7px; color:#333;">
-          <strong>Why this match:</strong> ${escapeHtml(data.reasoning)}
+          <strong>Why this match:</strong> ${escapeHtml(cleanReason)}
         </div>
+      </div>
+      <div id="applied-tags-status" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button type="button" class="btn-flag-tag" style="background:#FFFFFF; border:2px solid #171722; font-weight:800; padding:8px 14px;" onclick="applySuggestedTags('${safeRole}', '${safeCity}')">
+          ✓ Apply Suggested Tags
+        </button>
+        <button type="button" class="btn-ig-blue" style="padding:8px 14px; font-size:0.8rem;" onclick="applyAndPublishSuggestedJob('${safeRole}', '${safeCity}')">
+          🚀 Apply & Publish Now →
+        </button>
       </div>
     </div>
   `;
@@ -2217,16 +2290,25 @@ async function previewLlmTagging() {
 async function submitRecruiterJob(e) {
   e.preventDefault();
   const urlField = document.getElementById('rec-url');
+  const locationRawVal = document.getElementById('rec-location').value.trim();
+  const titleVal = document.getElementById('rec-title').value.trim();
+  const descVal = document.getElementById('rec-desc').value.trim();
+  const localTag = clientClassifyJob(titleVal, locationRawVal, descVal);
+
   const payload = {
-    title: document.getElementById('rec-title').value.trim(),
+    title: titleVal,
     company: document.getElementById('rec-company').value.trim(),
-    location_raw: document.getElementById('rec-location').value.trim(),
+    location_raw: locationRawVal,
     stipend_or_salary: document.getElementById('rec-stipend').value.trim(),
     job_type: document.getElementById('rec-type').value,
     skills: document.getElementById('rec-skills').value,
     url: urlField ? urlField.value.trim() : '',
-    description: document.getElementById('rec-desc').value.trim(),
-    posted_by: state.currentUser?.id || 2
+    description: descVal,
+    posted_by: state.currentUser?.id || 2,
+    override_role_tag: appliedSuggestedTags?.role_tag || undefined,
+    override_city:
+      appliedSuggestedTags?.city ||
+      (localTag.city !== 'Remote (India)' ? localTag.city : undefined)
   };
 
   const box = document.getElementById('rec-llm-preview-box');
@@ -2265,6 +2347,10 @@ async function submitRecruiterJob(e) {
     `;
     return;
   }
+
+  appliedSuggestedTags = null;
+  const recForm = document.getElementById('recruiter-post-form');
+  if (recForm) recForm.reset();
 
   box.innerHTML = `
     <div style="color:#065F46; font-weight:800; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
