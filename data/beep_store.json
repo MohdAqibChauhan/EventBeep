@@ -132,8 +132,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 39,
-      "apply_clicks": 17
+      "views_count": 40,
+      "apply_clicks": 18
     },
     {
       "id": 2,
@@ -167,8 +167,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 41,
-      "apply_clicks": 15
+      "views_count": 42,
+      "apply_clicks": 16
     },
     {
       "id": 3,
@@ -10799,6 +10799,22 @@
   ],
   "tag_corrections": [
     {
+      "id": 9,
+      "job_id": 5,
+      "job_title": "Engineer, Product Security — Intern / Trainee Track",
+      "company": "Druva",
+      "previous_role": "Software Engineering",
+      "previous_city": "Pune",
+      "corrected_role": "Product Design (UI/UX)",
+      "corrected_city": "Bengaluru",
+      "reason": "Automated test verification of tag feedback pipeline",
+      "by_user_id": 1,
+      "by_user_name": "Mohdaqib (Student)",
+      "by_user_role": "user",
+      "status": "dismissed",
+      "created_at": "2026-11-16T10:44:23.748Z"
+    },
+    {
       "id": 8,
       "job_id": 5,
       "job_title": "Engineer, Product Security — Intern / Trainee Track",
@@ -13083,6 +13099,29 @@
     "llm_model": "gemini-2.5-flash-lite"
   },
   "applications": [
+    {
+      "id": 5,
+      "job_id": 2,
+      "job_title": "Product Design (UI/UX) Intern — AI School",
+      "company": "Beep Careers (EventBeep)",
+      "role_tag": "Product Design (UI/UX)",
+      "city": "Pune",
+      "student_id": 1,
+      "student_name": "Siddharth Joshi",
+      "student_email": "test.applicant.1794825864022@pict.edu",
+      "student_phone": "+91 98111 22334",
+      "college": "PICT Pune",
+      "graduation_year": "2026",
+      "resume_url": "https://github.com/siddharth",
+      "skills": [
+        "Figma",
+        "UI/UX",
+        "React"
+      ],
+      "cover_note": "Direct application test for recruiters without a company website.",
+      "status": "Shortlisted",
+      "applied_at": "2026-11-16T10:44:24.024Z"
+    },
     {
       "id": 4,
       "job_id": 2,

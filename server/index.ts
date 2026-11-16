@@ -100,9 +100,12 @@ async function callPythonSingleTagger(payload: {
 async function executeFullPipeline(trigger: 'daily-cron' | 'manual-admin'): Promise<any> {
   const store = getStore();
   const startMs = Date.now();
-  const collected = await runCollectorsAndDedupe([]);
+  const customRecruiterJobs = store.jobs.filter(
+    (j) => j.source === 'EventBeep Direct Recruiter' && j.id > 3
+  );
+  const collected = await runCollectorsAndDedupe(customRecruiterJobs);
 
-  store.jobs = collected.newJobs;
+  store.jobs = [...customRecruiterJobs, ...collected.newJobs];
   store.duplicate_logs = collected.duplicates;
   store.eval_50 = buildHandChecked50(store.jobs);
 

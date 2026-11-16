@@ -167,7 +167,7 @@ const ROLE_CONFIG = {
       '💰 <strong>₹2.81 ($0.0333) per 1,000 Jobs</strong>'
     ],
     heroCtas: [
-      { cls: 'btn-ig-blue', action: 'triggerManualPipeline()', label: '🔄 Sync Latest Jobs Now', id: 'hero-refresh-btn' },
+      { cls: 'btn-ig-blue', action: 'triggerManualPipeline()', label: '🔄 Fetch External Job Boards', id: 'hero-refresh-btn' },
       { cls: 'btn-ig-yellow', action: "switchTab('admin-eval')", label: '📊 View 50-Job Accuracy Report' }
     ],
     cards: [
@@ -361,12 +361,28 @@ async function initApp() {
   );
   initLiveStreamAndScrollListener();
 
-  const savedSession = sessionStorage.getItem('beep_logged_user');
+  const savedFilters = localStorage.getItem('beep_explore_filters');
+  if (savedFilters) {
+    try {
+      const parsedFilters = JSON.parse(savedFilters);
+      state.filters = { ...state.filters, ...parsedFilters };
+      const qEl = document.getElementById('search-q');
+      const jtEl = document.getElementById('filter-job-type');
+      const wmEl = document.getElementById('filter-work-mode');
+      const sortEl = document.getElementById('filter-sort');
+      if (qEl) qEl.value = state.filters.q || '';
+      if (jtEl) jtEl.value = state.filters.job_type || 'All';
+      if (wmEl) wmEl.value = state.filters.work_mode || 'All';
+      if (sortEl) sortEl.value = state.filters.sort || 'newest';
+    } catch {}
+  }
+
+  const savedSession = localStorage.getItem('beep_logged_user') || sessionStorage.getItem('beep_logged_user');
   if (savedSession) {
     try {
       const user = JSON.parse(savedSession);
       if (user && user.role) {
-        await enterPortalWithUser(user);
+        await enterPortalWithUser(user, true);
         return;
       }
     } catch {}
@@ -405,6 +421,9 @@ function initLiveStreamAndScrollListener() {
             state.pendingLiveJobs.push(newJob);
             updateLiveScrollToast();
             loadMeta();
+            if (state.currentUser?.role === 'admin' && state.currentTab === 'admin-pipeline') {
+              loadAdminOverview();
+            }
           }
         } else if (msg.type === 'new_application' && state.currentUser?.role === 'recruiter') {
           loadRecruiterApplicants();
@@ -632,9 +651,10 @@ async function submitRegisterPage(e) {
   await enterPortalWithUser(data.user);
 }
 
-async function enterPortalWithUser(user) {
+async function enterPortalWithUser(user, isReload = false) {
   state.isAuthenticated = true;
   state.currentUser = user;
+  localStorage.setItem('beep_logged_user', JSON.stringify(user));
   sessionStorage.setItem('beep_logged_user', JSON.stringify(user));
 
   document.getElementById('login-screen').classList.add('hidden');
@@ -644,17 +664,31 @@ async function enterPortalWithUser(user) {
   await loadSavedJobs();
   await loadUserApplicationsList();
 
+  const validTabsByRole = {
+    user: ['explore', 'student-saved', 'student-activity'],
+    recruiter: ['recruiter-post', 'recruiter-applicants', 'recruiter-manage', 'explore'],
+    admin: ['admin-pipeline', 'admin-eval', 'admin-moderation', 'admin-docs', 'explore']
+  };
+  const defaultTabByRole = {
+    user: 'explore',
+    recruiter: 'recruiter-post',
+    admin: 'admin-pipeline'
+  };
+
+  const savedTab = localStorage.getItem(`beep_active_tab_${user.role}`);
+  const allowedTabs = validTabsByRole[user.role] || validTabsByRole.user;
+  const targetTab = isReload && savedTab && allowedTabs.includes(savedTab)
+    ? savedTab
+    : defaultTabByRole[user.role] || 'explore';
+
   if (user.role === 'recruiter') {
     await loadRecruiterApplicants();
-    switchTab('recruiter-post');
-  } else if (user.role === 'admin') {
-    switchTab('admin-pipeline');
-  } else {
-    switchTab('explore');
   }
+  await switchTab(targetTab);
 }
 
 function logoutToLoginPage() {
+  localStorage.removeItem('beep_logged_user');
   sessionStorage.removeItem('beep_logged_user');
   showLoginScreen();
 }
@@ -1003,10 +1037,17 @@ function renderPagination(page, totalPages, totalFiltered) {
   `;
 }
 
+function saveFiltersState() {
+  try {
+    localStorage.setItem('beep_explore_filters', JSON.stringify(state.filters));
+  } catch {}
+}
+
 function selectRoleFilter(role) {
   if (state.currentTab !== 'explore') switchTab('explore');
   state.filters.role = role;
   state.filters.page = 1;
+  saveFiltersState();
   loadJobs();
 }
 
@@ -1014,6 +1055,7 @@ function selectCityFilter(city) {
   if (state.currentTab !== 'explore') switchTab('explore');
   state.filters.city = city;
   state.filters.page = 1;
+  saveFiltersState();
   loadJobs();
 }
 
@@ -1023,6 +1065,7 @@ function onSearchFilterChange() {
   state.filters.work_mode = document.getElementById('filter-work-mode').value;
   state.filters.sort = document.getElementById('filter-sort').value;
   state.filters.page = 1;
+  saveFiltersState();
 
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(() => {
@@ -1045,11 +1088,13 @@ function resetAllFilters() {
     page: 1,
     limit: 24
   };
+  saveFiltersState();
   loadJobs();
 }
 
 function goToPage(p) {
   state.filters.page = p;
+  saveFiltersState();
   loadJobs();
   window.scrollTo({ top: 320, behavior: 'smooth' });
 }
@@ -1108,8 +1153,14 @@ async function submitDirectApplication(e) {
   if (state.currentTab === 'student-saved') await loadSavedJobs();
 }
 
-function switchTab(tabName) {
+async function switchTab(tabName) {
   state.currentTab = tabName;
+  if (state.currentUser?.role) {
+    try {
+      localStorage.setItem(`beep_active_tab_${state.currentUser.role}`, tabName);
+    } catch {}
+  }
+
   const activeNavId =
     state.currentUser.role === 'admin'
       ? 'nav-for-admin'
@@ -1140,19 +1191,19 @@ function switchTab(tabName) {
   }
 
   if (tabName === 'explore') {
-    loadJobs();
+    await loadJobs();
   } else if (tabName === 'student-saved') {
-    loadSavedJobs();
+    await loadSavedJobs();
   } else if (tabName === 'student-activity') {
-    loadStudentActivity();
+    await loadStudentActivity();
   } else if (tabName === 'recruiter-manage') {
-    loadRecruiterJobs();
+    await loadRecruiterJobs();
   } else if (tabName === 'recruiter-applicants') {
-    loadRecruiterApplicants();
+    await loadRecruiterApplicants();
   } else if (tabName === 'admin-pipeline' || tabName === 'admin-moderation') {
-    loadAdminOverview();
+    await loadAdminOverview();
   } else if (tabName === 'admin-eval') {
-    loadEvalView();
+    await loadEvalView();
   }
 }
 
