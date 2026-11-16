@@ -9,10 +9,12 @@ import { StoreSchema, Profile, PipelineRun } from './types';
 
 dotenv.config();
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const STORE_PATH = path.join(DATA_DIR, 'beep_store.json');
-const CSV_50_PATH = path.join(DATA_DIR, 'hand_checked_50_posts.csv');
-const CSV_ALL_PATH = path.join(DATA_DIR, 'all_200_plus_jobs.csv');
+const SEED_DATA_DIR = path.join(process.cwd(), 'data');
+const RUNTIME_DATA_DIR = process.env.VERCEL ? '/tmp' : SEED_DATA_DIR;
+const SEED_STORE_PATH = path.join(SEED_DATA_DIR, 'beep_store.json');
+const STORE_PATH = path.join(RUNTIME_DATA_DIR, 'beep_store.json');
+const CSV_50_PATH = path.join(RUNTIME_DATA_DIR, 'hand_checked_50_posts.csv');
+const CSV_ALL_PATH = path.join(RUNTIME_DATA_DIR, 'all_200_plus_jobs.csv');
 
 let pgPool: Pool | null = null;
 let pgConnected = false;
@@ -53,89 +55,91 @@ function escapeCsv(val: unknown): string {
 }
 
 export function exportCsvFiles(store: StoreSchema): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+  try {
+    if (!fs.existsSync(RUNTIME_DATA_DIR)) {
+      fs.mkdirSync(RUNTIME_DATA_DIR, { recursive: true });
+    }
 
-  const evalHeaders = [
-    'Sample #',
-    'Job ID',
-    'Company',
-    'Job Title',
-    'Raw Location',
-    'Source',
-    'LLM Role Tag',
-    'Human Role Tag',
-    'Role Correct',
-    'LLM City Tag',
-    'Human City Tag',
-    'City Correct',
-    'Both Correct',
-    'Confidence',
-    'Audit Notes / Error Analysis'
-  ];
-  const evalRows = store.eval_50.map((s) =>
-    [
-      s.sample_no,
-      s.job_id,
-      s.company,
-      s.title,
-      s.location_raw,
-      s.source,
-      s.llm_role,
-      s.human_role,
-      s.role_correct ? 'TRUE' : 'FALSE',
-      s.llm_city,
-      s.human_city,
-      s.city_correct ? 'TRUE' : 'FALSE',
-      s.both_correct ? 'TRUE' : 'FALSE',
-      s.llm_confidence,
-      s.error_analysis
-    ]
-      .map(escapeCsv)
-      .join(',')
-  );
-  fs.writeFileSync(CSV_50_PATH, [evalHeaders.join(','), ...evalRows].join('\n'), 'utf8');
+    const evalHeaders = [
+      'Sample #',
+      'Job ID',
+      'Company',
+      'Job Title',
+      'Raw Location',
+      'Source',
+      'LLM Role Tag',
+      'Human Role Tag',
+      'Role Correct',
+      'LLM City Tag',
+      'Human City Tag',
+      'City Correct',
+      'Both Correct',
+      'Confidence',
+      'Audit Notes / Error Analysis'
+    ];
+    const evalRows = store.eval_50.map((s) =>
+      [
+        s.sample_no,
+        s.job_id,
+        s.company,
+        s.title,
+        s.location_raw,
+        s.source,
+        s.llm_role,
+        s.human_role,
+        s.role_correct ? 'TRUE' : 'FALSE',
+        s.llm_city,
+        s.human_city,
+        s.city_correct ? 'TRUE' : 'FALSE',
+        s.both_correct ? 'TRUE' : 'FALSE',
+        s.llm_confidence,
+        s.error_analysis
+      ]
+        .map(escapeCsv)
+        .join(',')
+    );
+    fs.writeFileSync(CSV_50_PATH, [evalHeaders.join(','), ...evalRows].join('\n'), 'utf8');
 
-  const jobHeaders = [
-    'ID',
-    'Title',
-    'Company',
-    'LLM Role Tag',
-    'Normalized City',
-    'Work Mode',
-    'Job Type',
-    'Stipend / CTC',
-    'Experience',
-    'Raw Location',
-    'Source',
-    'Confidence',
-    'Canonical URL',
-    'Dedupe SHA256 Hash',
-    'Posted At'
-  ];
-  const jobRows = store.jobs.map((j) =>
-    [
-      j.id,
-      j.title,
-      j.company,
-      j.role_tag,
-      j.city,
-      j.work_mode,
-      j.job_type,
-      j.stipend_or_salary,
-      j.experience_required,
-      j.location_raw,
-      j.source,
-      j.confidence,
-      j.canonical_url,
-      j.dedupe_hash,
-      j.posted_at
-    ]
-      .map(escapeCsv)
-      .join(',')
-  );
-  fs.writeFileSync(CSV_ALL_PATH, [jobHeaders.join(','), ...jobRows].join('\n'), 'utf8');
+    const jobHeaders = [
+      'ID',
+      'Title',
+      'Company',
+      'LLM Role Tag',
+      'Normalized City',
+      'Work Mode',
+      'Job Type',
+      'Stipend / CTC',
+      'Experience',
+      'Raw Location',
+      'Source',
+      'Confidence',
+      'Canonical URL',
+      'Dedupe SHA256 Hash',
+      'Posted At'
+    ];
+    const jobRows = store.jobs.map((j) =>
+      [
+        j.id,
+        j.title,
+        j.company,
+        j.role_tag,
+        j.city,
+        j.work_mode,
+        j.job_type,
+        j.stipend_or_salary,
+        j.experience_required,
+        j.location_raw,
+        j.source,
+        j.confidence,
+        j.canonical_url,
+        j.dedupe_hash,
+        j.posted_at
+      ]
+        .map(escapeCsv)
+        .join(',')
+    );
+    fs.writeFileSync(CSV_ALL_PATH, [jobHeaders.join(','), ...jobRows].join('\n'), 'utf8');
+  } catch {}
 }
 
 export async function syncToPostgresIfAvailable(store: StoreSchema): Promise<void> {
@@ -217,13 +221,15 @@ export function buildPipelineRunRecord(params: {
 let memoryStore: StoreSchema | null = null;
 
 export function saveStore(store: StoreSchema): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
   store.meta.pg_connected = pgConnected;
   memoryStore = store;
-  fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
-  exportCsvFiles(store);
+  try {
+    if (!fs.existsSync(RUNTIME_DATA_DIR)) {
+      fs.mkdirSync(RUNTIME_DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
+    exportCsvFiles(store);
+  } catch {}
 }
 
 function defaultSeedApplications(): StoreSchema['applications'] {
@@ -289,27 +295,33 @@ function defaultSeedApplications(): StoreSchema['applications'] {
 }
 
 export async function initStore(): Promise<StoreSchema> {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+  if (memoryStore) return memoryStore;
+  try {
+    if (!fs.existsSync(RUNTIME_DATA_DIR)) {
+      fs.mkdirSync(RUNTIME_DATA_DIR, { recursive: true });
+    }
+  } catch {}
 
   await tryConnectPostgres();
 
-  if (fs.existsSync(STORE_PATH)) {
-    try {
-      const raw = fs.readFileSync(STORE_PATH, 'utf8');
-      const parsed = JSON.parse(raw) as StoreSchema;
-      if (parsed && Array.isArray(parsed.jobs) && parsed.jobs.length >= 200) {
-        if (!Array.isArray(parsed.applications) || parsed.applications.length === 0) {
-          parsed.applications = defaultSeedApplications();
+  const candidatePaths = [STORE_PATH, SEED_STORE_PATH];
+  for (const candidate of candidatePaths) {
+    if (fs.existsSync(candidate)) {
+      try {
+        const raw = fs.readFileSync(candidate, 'utf8');
+        const parsed = JSON.parse(raw) as StoreSchema;
+        if (parsed && Array.isArray(parsed.jobs) && parsed.jobs.length >= 200) {
+          if (!Array.isArray(parsed.applications) || parsed.applications.length === 0) {
+            parsed.applications = defaultSeedApplications();
+          }
+          parsed.meta.pg_connected = pgConnected;
+          memoryStore = parsed;
+          saveStore(parsed);
+          await syncToPostgresIfAvailable(parsed);
+          return parsed;
         }
-        parsed.meta.pg_connected = pgConnected;
-        memoryStore = parsed;
-        exportCsvFiles(parsed);
-        await syncToPostgresIfAvailable(parsed);
-        return parsed;
-      }
-    } catch {}
+      } catch {}
+    }
   }
 
   const startMs = Date.now();

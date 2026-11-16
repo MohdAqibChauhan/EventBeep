@@ -168,8 +168,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 33,
-      "apply_clicks": 11
+      "views_count": 34,
+      "apply_clicks": 12
     },
     {
       "id": 2,
@@ -203,8 +203,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 40,
-      "apply_clicks": 14
+      "views_count": 41,
+      "apply_clicks": 15
     },
     {
       "id": 3,
@@ -10764,6 +10764,22 @@
   ],
   "tag_corrections": [
     {
+      "id": 12,
+      "job_id": 5,
+      "job_title": "Analyst, Banking Alliances",
+      "company": "Razorpay",
+      "previous_role": "Finance & Analyst",
+      "previous_city": "Chennai",
+      "corrected_role": "Product Design (UI/UX)",
+      "corrected_city": "Bengaluru",
+      "reason": "Automated test verification of tag feedback pipeline",
+      "by_user_id": 1,
+      "by_user_name": "Mohdaqib (Student)",
+      "by_user_role": "user",
+      "status": "dismissed",
+      "created_at": "2026-11-16T11:13:13.353Z"
+    },
+    {
       "id": 11,
       "job_id": 5,
       "job_title": "Analyst, Banking Alliances",
@@ -13176,6 +13192,29 @@
     "llm_model": "gemini-2.5-flash-lite"
   },
   "applications": [
+    {
+      "id": 8,
+      "job_id": 2,
+      "job_title": "Product Design (UI/UX) Intern — AI School",
+      "company": "Beep Careers (EventBeep)",
+      "role_tag": "Product Design (UI/UX)",
+      "city": "Pune",
+      "student_id": 1,
+      "student_name": "Siddharth Joshi",
+      "student_email": "test.applicant.1794827593514@pict.edu",
+      "student_phone": "+91 98111 22334",
+      "college": "PICT Pune",
+      "graduation_year": "2026",
+      "resume_url": "https://github.com/siddharth",
+      "skills": [
+        "Figma",
+        "UI/UX",
+        "React"
+      ],
+      "cover_note": "Direct application test for recruiters without a company website.",
+      "status": "Shortlisted",
+      "applied_at": "2026-11-16T11:13:13.514Z"
+    },
     {
       "id": 7,
       "job_id": 2,

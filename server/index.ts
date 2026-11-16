@@ -22,6 +22,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'beep-career-platform-secret-2026';
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(async (_req, _res, next) => {
+  try {
+    await initStore();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 const sseClients = new Set<express.Response>();
 
@@ -82,6 +90,47 @@ async function callPythonSingleTagger(payload: {
     });
     return JSON.parse(stdout.trim());
   } catch {
+    const apiKey = (process.env.GEMINI_API_KEY || '').trim();
+    const model = (process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim();
+    if (apiKey) {
+      try {
+        const prompt = `Classify this Indian fresher/internship job into role_tag (${JSON.stringify(ROLE_TAXONOMY)}) and city (${JSON.stringify(CANONICAL_CITIES)}). Return JSON with keys role_tag, city, confidence, reasoning:\n${JSON.stringify(payload)}`;
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+            })
+          }
+        );
+        if (r.ok) {
+          const d: any = await r.json();
+          const text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
+          const parsed = JSON.parse(text);
+          const item = Array.isArray(parsed) ? parsed[0] : parsed;
+          if (item?.role_tag) {
+            return {
+              role_tag: ROLE_TAXONOMY.includes(item.role_tag)
+                ? item.role_tag
+                : classifyRoleRuleBased(payload.title, payload.description).role_tag,
+              city: CANONICAL_CITIES.includes(item.city)
+                ? item.city
+                : normalizeCity(payload.location_raw, payload.description).city,
+              confidence: Number(item.confidence || 0.95),
+              reasoning: item.reasoning || 'Tagged live via Gemini AI.',
+              tagged_by: 'gemini-llm',
+              model,
+              input_tokens: d?.usageMetadata?.promptTokenCount || 165,
+              output_tokens: d?.usageMetadata?.candidatesTokenCount || 42
+            };
+          }
+        }
+      } catch {}
+    }
+
     const { city } = normalizeCity(payload.location_raw, payload.description);
     const roleInfo = classifyRoleRuleBased(payload.title, payload.description);
     return {
@@ -90,7 +139,7 @@ async function callPythonSingleTagger(payload: {
       confidence: roleInfo.confidence,
       reasoning: roleInfo.reasoning,
       tagged_by: 'hybrid-llm-rules',
-      model: process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+      model,
       input_tokens: 165,
       output_tokens: 42
     };
@@ -685,11 +734,13 @@ app.put('/api/eval/:sampleNo', (req, res) => {
 });
 
 function sendCsvExport(res: express.Response, filename: string, downloadName: string) {
-  const csvPath = path.join(process.cwd(), 'data', filename);
-  if (fs.existsSync(csvPath)) {
+  const tmpPath = path.join('/tmp', filename);
+  const dataPath = path.join(process.cwd(), 'data', filename);
+  const chosenPath = fs.existsSync(tmpPath) ? tmpPath : dataPath;
+  if (fs.existsSync(chosenPath)) {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
-    return res.sendFile(csvPath);
+    return res.sendFile(chosenPath);
   }
   res.status(404).send('CSV not found');
 }
@@ -719,7 +770,11 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  console.error('Failed to start Beep server:', err);
-  process.exit(1);
-});
+if (!process.env.VERCEL) {
+  start().catch((err) => {
+    console.error('Failed to start Beep server:', err);
+    process.exit(1);
+  });
+}
+
+export default app;
