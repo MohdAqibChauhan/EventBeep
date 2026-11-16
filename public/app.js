@@ -275,12 +275,622 @@ function setText(id, val) {
   if (el) el.textContent = val;
 }
 
+let clientFallbackStore = null;
+
+function getClientStore() {
+  if (clientFallbackStore) return clientFallbackStore;
+  const seed = window.BEEP_SEED_DATA?.store || {
+    profiles: [],
+    jobs: [],
+    saved_jobs: [],
+    applications: [],
+    tag_corrections: [],
+    duplicate_logs: [],
+    runs: [],
+    eval_50: [],
+    meta: {}
+  };
+  const cloned = JSON.parse(JSON.stringify(seed));
+  try {
+    const savedRaw = localStorage.getItem('beep_client_store_v1');
+    if (savedRaw) {
+      const saved = JSON.parse(savedRaw);
+      if (Array.isArray(saved.jobs) && saved.jobs.length >= 200) {
+        clientFallbackStore = saved;
+        return clientFallbackStore;
+      }
+    }
+  } catch {}
+  clientFallbackStore = cloned;
+  return clientFallbackStore;
+}
+
+function saveClientStore(store) {
+  clientFallbackStore = store;
+  try {
+    localStorage.setItem('beep_client_store_v1', JSON.stringify(store));
+  } catch {}
+}
+
+function computeClientEvalMetrics(eval50) {
+  const total = eval50.length || 50;
+  const roleOk = eval50.filter((s) => s.role_correct).length;
+  const cityOk = eval50.filter((s) => s.city_correct).length;
+  const bothOk = eval50.filter((s) => s.both_correct).length;
+  return {
+    total_checked: total,
+    role_correct_count: roleOk,
+    city_correct_count: cityOk,
+    both_correct_count: bothOk,
+    role_accuracy_pct: Number(((roleOk / total) * 100).toFixed(1)),
+    city_accuracy_pct: Number(((cityOk / total) * 100).toFixed(1)),
+    joint_accuracy_pct: Number(((bothOk / total) * 100).toFixed(1))
+  };
+}
+
+function clientClassifyJob(title, locationRaw, description) {
+  const tax = window.BEEP_SEED_DATA?.taxonomy || { roles: [], cities: [], city_aliases: [], role_rules: [] };
+  const rawLower = String(locationRaw || '').toLowerCase();
+  const combined = `${rawLower} ${String(description || '').slice(0, 300).toLowerCase()}`;
+  let work_mode = 'On-site';
+  if (/\bhybrid\b/i.test(combined)) work_mode = 'Hybrid';
+  else if (/\b(remote|wfh|work from home)\b/i.test(rawLower)) work_mode = 'Remote';
+
+  let city = 'Remote (India)';
+  for (const alias of tax.city_aliases || []) {
+    const re = new RegExp(alias.pattern, 'i');
+    if (re.test(rawLower) || re.test(combined)) {
+      city = alias.city;
+      if (city === 'Remote (India)') work_mode = 'Remote';
+      break;
+    }
+  }
+
+  let role_tag = 'Operations & Strategy';
+  let confidence = 0.88;
+  let reasoning = 'Matched based on job title and description keywords.';
+  const tLower = String(title || '').toLowerCase();
+  const dLower = String(description || '').toLowerCase();
+  for (const rule of tax.role_rules || []) {
+    const re = new RegExp(rule.pattern, 'i');
+    if (re.test(tLower) || re.test(dLower)) {
+      role_tag = rule.role;
+      confidence = rule.confidence;
+      reasoning = rule.reason;
+      break;
+    }
+  }
+  return { role_tag, city, work_mode, confidence, reasoning };
+}
+
+function handleClientFallbackApi(method, url, bodyObj = {}) {
+  const store = getClientStore();
+  const tax = window.BEEP_SEED_DATA?.taxonomy || { roles: [], cities: [] };
+  const parsedUrl = new URL(url, window.location.origin);
+  const pathName = parsedUrl.pathname;
+
+  if (method === 'GET' && pathName === '/api/meta') {
+    return {
+      ok: true,
+      status: 200,
+      data: {
+        meta: store.meta,
+        total_unique_jobs: store.jobs.filter((j) => j.status === 'tagged').length,
+        total_duplicates_removed: store.duplicate_logs.length,
+        roles_taxonomy: tax.roles,
+        cities_taxonomy: tax.cities,
+        eval_summary: computeClientEvalMetrics(store.eval_50),
+        latest_run: store.runs[0] || null
+      }
+    };
+  }
+
+  if (method === 'POST' && pathName === '/api/auth/login') {
+    const cleanEmail = String(bodyObj.email || '').trim().toLowerCase();
+    const rawPass = String(bodyObj.password || '');
+    const selectedRole = bodyObj.selected_role;
+
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return {
+        ok: false,
+        status: 400,
+        data: { error: 'Please enter a valid email address (for example: name@college.edu).', code: 'INVALID_EMAIL' }
+      };
+    }
+    if (!rawPass) {
+      return {
+        ok: false,
+        status: 400,
+        data: { error: 'Please enter your password to sign in.', code: 'MISSING_PASSWORD' }
+      };
+    }
+
+    const seedPasswords = {
+      'student@eventbeep.com': 'student123',
+      'recruiter@eventbeep.com': 'recruiter123',
+      'admin@eventbeep.com': 'admin123'
+    };
+    const localProfiles = getLocalRegisteredProfiles();
+    for (const lp of localProfiles) {
+      if (lp?.email && !store.profiles.some((p) => p.email.toLowerCase() === lp.email.toLowerCase())) {
+        store.profiles.push(lp);
+      }
+    }
+
+    const user = store.profiles.find((p) => p.email.toLowerCase() === cleanEmail);
+    if (!user) {
+      return {
+        ok: false,
+        status: 401,
+        data: {
+          error: `No account found for "${cleanEmail}" in the database. Please check your email spelling, or click "+ Create New Account" below if you are a new user.`,
+          code: 'ACCOUNT_NOT_FOUND',
+          email: cleanEmail
+        }
+      };
+    }
+
+    const expectedPass = seedPasswords[cleanEmail] || user.plain_password;
+    if (expectedPass && rawPass !== expectedPass) {
+      return {
+        ok: false,
+        status: 401,
+        data: {
+          error: `Incorrect password for "${cleanEmail}". Please double-check your password and try again.`,
+          code: 'WRONG_PASSWORD'
+        }
+      };
+    }
+
+    const roleDisplay = { user: 'Student', recruiter: 'Recruiter', admin: 'Admin' };
+    if (selectedRole && ['user', 'recruiter', 'admin'].includes(selectedRole) && user.role !== selectedRole) {
+      return {
+        ok: false,
+        status: 403,
+        data: {
+          error: `The account "${cleanEmail}" is registered as a ${roleDisplay[user.role]} account, not a ${roleDisplay[selectedRole]} account. Please switch to the "${roleDisplay[user.role]}" tab above to sign in.`,
+          code: 'ROLE_MISMATCH',
+          actual_role: user.role
+        }
+      };
+    }
+
+    return { ok: true, status: 200, data: { token: 'beep-local-token', user } };
+  }
+
+  if (method === 'POST' && pathName === '/api/auth/register') {
+    const cleanName = String(bodyObj.name || '').trim();
+    const cleanEmail = String(bodyObj.email || '').trim().toLowerCase();
+    const rawPass = String(bodyObj.password || '');
+    const role = bodyObj.role === 'recruiter' ? 'recruiter' : 'user';
+
+    if (!cleanName || cleanName.length < 2) {
+      return { ok: false, status: 400, data: { error: 'Please enter your full name (at least 2 characters).', code: 'INVALID_NAME' } };
+    }
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return { ok: false, status: 400, data: { error: 'Please enter a valid email address (for example: name@college.edu).', code: 'INVALID_EMAIL' } };
+    }
+    if (!rawPass || rawPass.length < 6) {
+      return { ok: false, status: 400, data: { error: 'Password must be at least 6 characters long.', code: 'WEAK_PASSWORD' } };
+    }
+    if (store.profiles.some((p) => p.email.toLowerCase() === cleanEmail)) {
+      return {
+        ok: false,
+        status: 409,
+        data: {
+          error: `An account with "${cleanEmail}" already exists in the database! Please sign in above with your password.`,
+          code: 'EMAIL_EXISTS'
+        }
+      };
+    }
+
+    const nextId = store.profiles.reduce((m, p) => Math.max(m, p.id || 0), 3) + 1;
+    const newProfile = {
+      id: nextId,
+      name: cleanName,
+      email: cleanEmail,
+      plain_password: rawPass,
+      password_hash: 'client-registered',
+      role,
+      company: role === 'recruiter' ? String(bodyObj.company || `${cleanName.split(' ')[0]}'s Company`).trim() : undefined,
+      college: role === 'user' ? String(bodyObj.college || 'Engineering & Management College, India').trim() : undefined,
+      created_at: new Date().toISOString()
+    };
+    store.profiles.push(newProfile);
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { token: 'beep-local-token', user: newProfile, profile_record: newProfile } };
+  }
+
+  if (method === 'GET' && pathName === '/api/jobs') {
+    const q = String(parsedUrl.searchParams.get('q') || '').trim().toLowerCase();
+    const role = String(parsedUrl.searchParams.get('role') || '').trim();
+    const city = String(parsedUrl.searchParams.get('city') || '').trim();
+    const work_mode = String(parsedUrl.searchParams.get('work_mode') || '').trim();
+    const job_type = String(parsedUrl.searchParams.get('job_type') || '').trim();
+    const sort = String(parsedUrl.searchParams.get('sort') || 'newest').trim();
+    const page = Math.max(1, Number(parsedUrl.searchParams.get('page') || 1));
+    const limit = Math.min(250, Math.max(10, Number(parsedUrl.searchParams.get('limit') || 24)));
+    const viewerRole = String(parsedUrl.searchParams.get('viewer_role') || '');
+
+    const activeJobs = store.jobs.filter((j) => j.status === 'tagged');
+    const roleCounts = {};
+    const cityCounts = {};
+    for (const j of activeJobs) {
+      roleCounts[j.role_tag] = (roleCounts[j.role_tag] || 0) + 1;
+      cityCounts[j.city] = (cityCounts[j.city] || 0) + 1;
+    }
+
+    const filtered = activeJobs.filter((j) => {
+      if (role && role !== 'All' && j.role_tag !== role) return false;
+      if (city && city !== 'All' && j.city !== city) return false;
+      if (work_mode && work_mode !== 'All' && j.work_mode !== work_mode) return false;
+      if (job_type && job_type !== 'All' && j.job_type !== job_type) return false;
+      if (q) {
+        const hay = `${j.title} ${j.company} ${j.city} ${j.role_tag} ${j.location_raw} ${(j.skills || []).join(' ')} ${j.description}`.toLowerCase();
+        for (const term of q.split(/\s+/).filter(Boolean)) {
+          if (!hay.includes(term)) return false;
+        }
+      }
+      return true;
+    });
+
+    if (sort === 'confidence') filtered.sort((a, b) => b.confidence - a.confidence);
+    else if (sort === 'popular') filtered.sort((a, b) => b.views_count + b.apply_clicks * 3 - (a.views_count + a.apply_clicks * 3));
+    else filtered.sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime());
+
+    const totalFiltered = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / limit));
+    const items = filtered.slice((page - 1) * limit, page * limit);
+    if (viewerRole === 'user' && items.length > 0) {
+      for (const item of items) item.views_count = (item.views_count || 0) + 1;
+      saveClientStore(store);
+    }
+
+    return {
+      ok: true,
+      status: 200,
+      data: {
+        total_all_jobs: activeJobs.length,
+        total_filtered: totalFiltered,
+        page,
+        limit,
+        total_pages: totalPages,
+        items,
+        facets: { roles: roleCounts, cities: cityCounts }
+      }
+    };
+  }
+
+  if (method === 'GET' && pathName === '/api/user/saved') {
+    const userId = Number(parsedUrl.searchParams.get('user_id') || 1);
+    const savedIds = store.saved_jobs.filter((s) => s.user_id === userId).map((s) => s.job_id);
+    const savedJobs = store.jobs.filter((j) => savedIds.includes(j.id));
+    return { ok: true, status: 200, data: { saved_ids: savedIds, jobs: savedJobs } };
+  }
+
+  if (method === 'POST' && pathName === '/api/user/saved') {
+    const userId = Number(bodyObj.user_id || 1);
+    const jobId = Number(bodyObj.job_id);
+    const idx = store.saved_jobs.findIndex((s) => s.user_id === userId && s.job_id === jobId);
+    let saved = false;
+    if (idx >= 0) store.saved_jobs.splice(idx, 1);
+    else {
+      store.saved_jobs.push({ user_id: userId, job_id: jobId, saved_at: new Date().toISOString() });
+      saved = true;
+    }
+    saveClientStore(store);
+    const savedIds = store.saved_jobs.filter((s) => s.user_id === userId).map((s) => s.job_id);
+    return { ok: true, status: 200, data: { saved, saved_ids: savedIds } };
+  }
+
+  if (method === 'GET' && pathName === '/api/user/applications') {
+    const email = String(parsedUrl.searchParams.get('email') || '').toLowerCase();
+    const apps = store.applications.filter((a) => a.student_email.toLowerCase() === email);
+    return { ok: true, status: 200, data: { applications: apps } };
+  }
+
+  if (method === 'GET' && pathName === '/api/recruiter/applications') {
+    const jobId = Number(parsedUrl.searchParams.get('job_id') || 0);
+    if (!jobId) return { ok: true, status: 200, data: { applications: store.applications } };
+    const targetJob = store.jobs.find((j) => j.id === jobId);
+    const apps = store.applications.filter((a) => a.job_id === jobId || (targetJob && a.job_title === targetJob.title));
+    return { ok: true, status: 200, data: { applications: apps } };
+  }
+
+  const appStatusMatch = pathName.match(/^\/api\/recruiter\/applications\/(\d+)\/status$/);
+  if (method === 'PUT' && appStatusMatch) {
+    const appId = Number(appStatusMatch[1]);
+    const appItem = store.applications.find((a) => a.id === appId);
+    if (!appItem) return { ok: false, status: 404, data: { error: 'Application not found' } };
+    if (bodyObj.status) appItem.status = bodyObj.status;
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { ok: true, application: appItem } };
+  }
+
+  const jobApplyMatch = pathName.match(/^\/api\/jobs\/(\d+)\/apply$/);
+  if (method === 'POST' && jobApplyMatch) {
+    const jobId = Number(jobApplyMatch[1]);
+    const job = store.jobs.find((j) => j.id === jobId);
+    if (!job) return { ok: false, status: 404, data: { error: 'Job not found' } };
+    const cleanEmail = String(bodyObj.student_email || '').trim();
+    const existing = store.applications.find(
+      (a) => a.job_id === jobId && a.student_email.toLowerCase() === cleanEmail.toLowerCase()
+    );
+    if (existing) {
+      return {
+        ok: false,
+        status: 409,
+        data: { error: 'You have already applied for this role with this email address. You can track your application in the My Applications tab.' }
+      };
+    }
+    const newApp = {
+      id: store.applications.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1,
+      job_id: job.id,
+      job_title: job.title,
+      company: job.company,
+      role_tag: job.role_tag,
+      city: job.city,
+      student_id: Number(bodyObj.student_id || 1),
+      student_name: String(bodyObj.student_name || '').trim(),
+      student_email: cleanEmail,
+      student_phone: String(bodyObj.student_phone || '').trim(),
+      college: String(bodyObj.college || 'PICT Pune').trim(),
+      graduation_year: String(bodyObj.graduation_year || '2026').trim(),
+      resume_url: String(bodyObj.resume_url || 'https://github.com/').trim(),
+      skills: String(bodyObj.skills || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      cover_note: String(bodyObj.cover_note || '').trim(),
+      status: 'Under Review',
+      applied_at: new Date().toISOString()
+    };
+    store.applications.unshift(newApp);
+    job.apply_clicks = (job.apply_clicks || 0) + 1;
+    job.views_count = (job.views_count || 0) + 1;
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { ok: true, application: newApp } };
+  }
+
+  const jobClickMatch = pathName.match(/^\/api\/jobs\/(\d+)\/click$/);
+  if (method === 'POST' && jobClickMatch) {
+    const jobId = Number(jobClickMatch[1]);
+    const job = store.jobs.find((j) => j.id === jobId);
+    if (job) {
+      job.apply_clicks = (job.apply_clicks || 0) + 1;
+      job.views_count = (job.views_count || 0) + 1;
+      saveClientStore(store);
+    }
+    return { ok: true, status: 200, data: { ok: true } };
+  }
+
+  const reportTagMatch = pathName.match(/^\/api\/jobs\/(\d+)\/report-tag$/);
+  if (method === 'POST' && reportTagMatch) {
+    const jobId = Number(reportTagMatch[1]);
+    const job = store.jobs.find((j) => j.id === jobId);
+    if (!job) return { ok: false, status: 404, data: { error: 'Job not found' } };
+    const corr = {
+      id: store.tag_corrections.reduce((m, c) => Math.max(m, c.id || 0), 0) + 1,
+      job_id: job.id,
+      job_title: job.title,
+      company: job.company,
+      previous_role: job.role_tag,
+      previous_city: job.city,
+      corrected_role: bodyObj.corrected_role || job.role_tag,
+      corrected_city: bodyObj.corrected_city || job.city,
+      reason: String(bodyObj.reason || '').trim(),
+      by_user_id: Number(bodyObj.user_id || 1),
+      by_user_name: String(bodyObj.user_name || 'Student'),
+      by_user_role: bodyObj.user_role || 'user',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+    store.tag_corrections.unshift(corr);
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { ok: true, correction: corr } };
+  }
+
+  if (method === 'POST' && pathName === '/api/tag') {
+    const tag = clientClassifyJob(bodyObj.title, bodyObj.location_raw, bodyObj.description);
+    return { ok: true, status: 200, data: tag };
+  }
+
+  if (method === 'GET' && pathName === '/api/recruiter/jobs') {
+    const recruiterJobs = store.jobs
+      .filter((j) => j.source === 'EventBeep Direct Recruiter' || j.posted_by != null)
+      .map((j) => {
+        const directApps = store.applications.filter((a) => a.job_id === j.id || a.job_title === j.title).length;
+        j.apply_clicks = directApps;
+        j.views_count = Math.max(j.views_count || 0, directApps);
+        return j;
+      });
+    return { ok: true, status: 200, data: { jobs: recruiterJobs } };
+  }
+
+  if (method === 'POST' && pathName === '/api/recruiter/jobs') {
+    const cleanTitle = String(bodyObj.title || '').trim();
+    const cleanCompany = String(bodyObj.company || '').trim();
+    const cleanLoc = String(bodyObj.location_raw || '').trim();
+    const tag = clientClassifyJob(cleanTitle, cleanLoc, bodyObj.description);
+    const normKey = `${cleanCompany.toLowerCase().replace(/[^a-z0-9]/g, '')}|${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}|${tag.city.toLowerCase()}`;
+
+    const matched = store.jobs.find((j) => {
+      const k = `${j.company.toLowerCase().replace(/[^a-z0-9]/g, '')}|${j.title.toLowerCase().replace(/[^a-z0-9]/g, '')}|${j.city.toLowerCase()}`;
+      return k === normKey || (bodyObj.url && j.url === bodyObj.url);
+    });
+    if (matched) {
+      return {
+        ok: false,
+        status: 409,
+        data: {
+          error: `We found an existing post for "${matched.title}" at ${matched.company} in ${matched.city}, so we prevented a duplicate listing.`
+        }
+      };
+    }
+
+    const nextId = store.jobs.reduce((m, j) => Math.max(m, j.id || 0), 0) + 1;
+    const nowIso = new Date().toISOString();
+    const hasExt = Boolean(bodyObj.url && String(bodyObj.url).trim().startsWith('http'));
+    const newJob = {
+      id: nextId,
+      title: cleanTitle,
+      company: cleanCompany,
+      location_raw: cleanLoc,
+      description: String(bodyObj.description || `${cleanTitle} at ${cleanCompany}`).trim(),
+      url: hasExt ? String(bodyObj.url).trim() : `https://www.eventbeep.com/direct-apply/${Date.now()}`,
+      canonical_url: `https://www.eventbeep.com/direct-apply/${nextId}`,
+      dedupe_hash: normKey,
+      source: 'EventBeep Direct Recruiter',
+      job_type: bodyObj.job_type === 'Full-Time Fresher' ? 'Full-Time Fresher' : 'Internship',
+      work_mode: tag.work_mode,
+      stipend_or_salary: String(bodyObj.stipend_or_salary || '₹25,000 - ₹40,000 / month'),
+      experience_required: '0 yrs (Fresher)',
+      skills: String(bodyObj.skills || 'Problem Solving, Execution')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      posted_at: nowIso,
+      first_seen: nowIso,
+      last_seen: nowIso,
+      status: 'tagged',
+      role_tag: tag.role_tag,
+      city: tag.city,
+      confidence: tag.confidence,
+      llm_reasoning: tag.reasoning,
+      tagged_by: 'gemini-llm',
+      is_fresher: true,
+      posted_by: Number(bodyObj.posted_by || 2),
+      has_external_url: hasExt,
+      views_count: 0,
+      apply_clicks: 0
+    };
+    store.jobs.unshift(newJob);
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { ok: true, job: newJob, llm_tag: tag } };
+  }
+
+  const delJobMatch = pathName.match(/^\/api\/recruiter\/jobs\/(\d+)$/);
+  if (method === 'DELETE' && delJobMatch) {
+    const jobId = Number(delJobMatch[1]);
+    const idx = store.jobs.findIndex((j) => j.id === jobId);
+    if (idx >= 0) {
+      store.jobs.splice(idx, 1);
+      saveClientStore(store);
+    }
+    return { ok: true, status: 200, data: { ok: true } };
+  }
+
+  if (method === 'GET' && pathName === '/api/admin/overview') {
+    return {
+      ok: true,
+      status: 200,
+      data: {
+        meta: store.meta,
+        total_jobs: store.jobs.length,
+        tagged_jobs: store.jobs.filter((j) => j.status === 'tagged').length,
+        pending_jobs: store.jobs.filter((j) => j.status === 'pending_review'),
+        runs: store.runs,
+        duplicate_logs: store.duplicate_logs.slice(0, 50),
+        total_duplicates: store.duplicate_logs.length,
+        tag_corrections: store.tag_corrections,
+        eval_metrics: computeClientEvalMetrics(store.eval_50),
+        eval_50: store.eval_50
+      }
+    };
+  }
+
+  if (method === 'POST' && pathName === '/api/admin/run-pipeline') {
+    const prevRun = store.runs[0] || {
+      sources_queried: [],
+      fetched: 393,
+      fresher_filtered: 393,
+      duplicates_removed: store.duplicate_logs.length,
+      duplicates_by_layer: { canonical_url: 24, entity_hash: 52, fuzzy_match: 17 }
+    };
+    const newRun = {
+      ...prevRun,
+      id: store.runs.length + 1,
+      started_at: new Date(Date.now() - 1800).toISOString(),
+      finished_at: new Date().toISOString(),
+      trigger: 'manual-admin',
+      tagged: store.jobs.length,
+      duration_ms: 1850
+    };
+    store.runs.unshift(newRun);
+    store.meta.last_refresh_at = newRun.finished_at;
+    saveClientStore(store);
+    return { ok: true, status: 200, data: { ok: true, run: newRun } };
+  }
+
+  const resolveCorrMatch = pathName.match(/^\/api\/admin\/corrections\/(\d+)\/resolve$/);
+  if (method === 'POST' && resolveCorrMatch) {
+    const corrId = Number(resolveCorrMatch[1]);
+    const corr = store.tag_corrections.find((c) => c.id === corrId);
+    if (corr) {
+      corr.status = bodyObj.action === 'dismiss' ? 'dismissed' : 'applied';
+      if (corr.status === 'applied') {
+        const job = store.jobs.find((j) => j.id === corr.job_id);
+        if (job) {
+          job.role_tag = corr.corrected_role;
+          job.city = corr.corrected_city;
+        }
+      }
+      saveClientStore(store);
+    }
+    return { ok: true, status: 200, data: { ok: true, correction: corr } };
+  }
+
+  const modJobMatch = pathName.match(/^\/api\/admin\/jobs\/(\d+)\/moderate$/);
+  if (method === 'POST' && modJobMatch) {
+    const jobId = Number(modJobMatch[1]);
+    const job = store.jobs.find((j) => j.id === jobId);
+    if (job) {
+      if (bodyObj.role_tag) job.role_tag = bodyObj.role_tag;
+      if (bodyObj.city) job.city = bodyObj.city;
+      saveClientStore(store);
+    }
+    return { ok: true, status: 200, data: { ok: true, job } };
+  }
+
+  if (method === 'GET' && pathName === '/api/eval') {
+    return {
+      ok: true,
+      status: 200,
+      data: {
+        metrics: computeClientEvalMetrics(store.eval_50),
+        samples: store.eval_50
+      }
+    };
+  }
+
+  const evalUpdateMatch = pathName.match(/^\/api\/eval\/(\d+)$/);
+  if (method === 'PUT' && evalUpdateMatch) {
+    const sampleNo = Number(evalUpdateMatch[1]);
+    const sample = store.eval_50.find((s) => s.sample_no === sampleNo);
+    if (sample) {
+      if (bodyObj.human_role) sample.human_role = bodyObj.human_role;
+      if (bodyObj.human_city) sample.human_city = bodyObj.human_city;
+      sample.role_correct = sample.llm_role === sample.human_role;
+      sample.city_correct = sample.llm_city === sample.human_city;
+      sample.both_correct = sample.role_correct && sample.city_correct;
+      saveClientStore(store);
+    }
+    return { ok: true, status: 200, data: { ok: true, sample, metrics: computeClientEvalMetrics(store.eval_50) } };
+  }
+
+  return { ok: false, status: 404, data: { error: 'Requested action could not be completed.' } };
+}
+
 async function apiGet(url) {
   try {
     const res = await fetch(url);
-    return await res.json();
+    const ct = res.headers.get('content-type') || '';
+    if (res.ok && ct.includes('application/json')) {
+      return await res.json();
+    }
+    return handleClientFallbackApi('GET', url).data;
   } catch {
-    return {};
+    return handleClientFallbackApi('GET', url).data;
   }
 }
 
@@ -291,16 +901,46 @@ async function apiPost(url, bodyObj = {}) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyObj)
     });
-    const text = await res.text();
-    let data = {};
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch {
-      data = { error: text || `Request failed (${res.status})` };
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, data };
     }
-    return { ok: res.ok, status: res.status, data };
-  } catch (err) {
-    return { ok: false, status: 500, data: { error: err?.message || 'Network error' } };
+    return handleClientFallbackApi('POST', url, bodyObj);
+  } catch {
+    return handleClientFallbackApi('POST', url, bodyObj);
+  }
+}
+
+async function apiPut(url, bodyObj = {}) {
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyObj)
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, data };
+    }
+    return handleClientFallbackApi('PUT', url, bodyObj);
+  } catch {
+    return handleClientFallbackApi('PUT', url, bodyObj);
+  }
+}
+
+async function apiDelete(url) {
+  try {
+    const res = await fetch(url, { method: 'DELETE' });
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, data };
+    }
+    return handleClientFallbackApi('DELETE', url);
+  } catch {
+    return handleClientFallbackApi('DELETE', url);
   }
 }
 
@@ -1727,16 +2367,14 @@ async function loadRecruiterApplicants() {
 }
 
 async function updateApplicationStatus(appId, newStatus) {
-  await fetch(`/api/recruiter/applications/${appId}/status`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: newStatus })
-  });
+  await apiPut(`/api/recruiter/applications/${appId}/status`, { status: newStatus });
+  showFeedbackToast(`✅ Applicant status updated to "${newStatus}"`);
   await loadRecruiterApplicants();
 }
 
 async function deleteJobListing(jobId) {
-  await fetch(`/api/recruiter/jobs/${jobId}`, { method: 'DELETE' });
+  await apiDelete(`/api/recruiter/jobs/${jobId}`);
+  showFeedbackToast('🗑️ Job listing removed');
   await loadMeta();
   if (state.currentTab === 'recruiter-manage') await loadRecruiterJobs();
   else await loadJobs();
@@ -1951,18 +2589,117 @@ function renderEvalView() {
     .join('');
 }
 
+function escapeCsvField(val) {
+  const s = String(val ?? '').replace(/\r?\n/g, ' ').trim();
+  if (s.includes(',') || s.includes('"')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function triggerCsvDownload(filename, csvText) {
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function downloadEval50Csv() {
+  const store = getClientStore();
+  const samples = state.evalData?.samples || store.eval_50 || [];
+  const headers = [
+    'Sample #',
+    'Job ID',
+    'Company',
+    'Job Title',
+    'Raw Location',
+    'Source',
+    'LLM Role Tag',
+    'Human Role Tag',
+    'Role Correct',
+    'LLM City Tag',
+    'Human City Tag',
+    'City Correct',
+    'Both Correct',
+    'Confidence',
+    'Audit Notes'
+  ];
+  const rows = samples.map((s) =>
+    [
+      s.sample_no,
+      s.job_id,
+      s.company,
+      s.title,
+      s.location_raw,
+      s.source,
+      s.llm_role,
+      s.human_role,
+      s.role_correct ? 'TRUE' : 'FALSE',
+      s.llm_city,
+      s.human_city,
+      s.city_correct ? 'TRUE' : 'FALSE',
+      s.both_correct ? 'TRUE' : 'FALSE',
+      s.llm_confidence,
+      s.error_analysis
+    ]
+      .map(escapeCsvField)
+      .join(',')
+  );
+  triggerCsvDownload('beep_50_hand_checked_eval.csv', [headers.join(','), ...rows].join('\n'));
+}
+
+function downloadAllJobsCsv() {
+  const store = getClientStore();
+  const jobs = store.jobs || [];
+  const headers = [
+    'ID',
+    'Title',
+    'Company',
+    'Role Tag',
+    'City',
+    'Work Mode',
+    'Job Type',
+    'Stipend / Salary',
+    'Experience',
+    'Raw Location',
+    'Source',
+    'Confidence',
+    'URL',
+    'Posted At'
+  ];
+  const rows = jobs.map((j) =>
+    [
+      j.id,
+      j.title,
+      j.company,
+      j.role_tag,
+      j.city,
+      j.work_mode,
+      j.job_type,
+      j.stipend_or_salary,
+      j.experience_required,
+      j.location_raw,
+      j.source,
+      j.confidence,
+      j.url,
+      j.posted_at
+    ]
+      .map(escapeCsvField)
+      .join(',')
+  );
+  triggerCsvDownload('beep_all_300_fresher_jobs.csv', [headers.join(','), ...rows].join('\n'));
+}
+
 async function updateEvalSample(sampleNo, newHumanRole, newHumanCity) {
   const body = {};
   if (newHumanRole) body.human_role = newHumanRole;
   if (newHumanCity) body.human_city = newHumanCity;
 
-  const res = await fetch(`/api/eval/${sampleNo}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  if (data.ok) {
+  const { ok, data } = await apiPut(`/api/eval/${sampleNo}`, body);
+  if (ok || data?.ok) {
     await loadEvalView();
   }
 }

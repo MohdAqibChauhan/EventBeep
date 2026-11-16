@@ -535,12 +535,12 @@
               </p>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <a href="/api/export/eval-50.csv" class="btn-ig-yellow" style="text-decoration:none;">
+              <button type="button" onclick="downloadEval50Csv()" class="btn-ig-yellow">
                 📥 Download 50-Job Audit Sheet (CSV)
-              </a>
-              <a href="/api/export/all-jobs.csv" class="btn-ig-blue" style="text-decoration:none;">
+              </button>
+              <button type="button" onclick="downloadAllJobsCsv()" class="btn-ig-blue">
                 📥 Download All 300+ Jobs (CSV)
-              </a>
+              </button>
             </div>
           </div>
 
@@ -773,6 +773,7 @@ Given a batch of Indian fresher / college internship job postings, classify each
 
   <div id="action-feedback-toast" class="hidden" style="position:fixed; bottom:24px; right:24px; z-index:9999; background:#171722; color:#FFE01B; border:2px solid #FFE01B; border-radius:12px; padding:12px 18px; font-weight:800; font-size:0.86rem; box-shadow:0 8px 24px rgba(0,0,0,0.35);"></div>
 
+  <script src="/seed-data.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
