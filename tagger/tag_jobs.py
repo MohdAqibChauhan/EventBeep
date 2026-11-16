@@ -117,6 +117,12 @@ def tag_single_job(payload: dict) -> dict:
     location_raw = payload.get("location_raw", "")
     description = payload.get("description", "")
 
+    raw_city = normalize_city_py(location_raw, "")
+    has_explicit_raw_city = any(
+        re.search(entry["pattern"], (location_raw or "").lower(), re.I)
+        for entry in CITY_ALIASES
+    )
+
     if api_key:
         try:
             results, in_tok, out_tok = call_gemini_batch(
@@ -127,12 +133,16 @@ def tag_single_job(payload: dict) -> dict:
             if results and isinstance(results, list):
                 r = results[0]
                 role_tag = r.get("role_tag") if r.get("role_tag") in ROLE_TAXONOMY else classify_role_py(title, description)[0]
-                city = r.get("city") if r.get("city") in CANONICAL_CITIES else normalize_city_py(location_raw, description)
+                llm_city = r.get("city") if r.get("city") in CANONICAL_CITIES else normalize_city_py(location_raw, description)
+                city = raw_city if has_explicit_raw_city else llm_city
+                reasoning = r.get("reasoning", "Tagged live via Gemini API.")
+                if has_explicit_raw_city and llm_city != raw_city:
+                    reasoning = f"Role classified as {role_tag} from job title and responsibilities; location '{location_raw}' normalized to {city}."
                 return {
                     "role_tag": role_tag,
                     "city": city,
                     "confidence": float(r.get("confidence", 0.95)),
-                    "reasoning": r.get("reasoning", "Tagged live via Gemini API."),
+                    "reasoning": reasoning,
                     "tagged_by": "gemini-llm",
                     "model": model,
                     "input_tokens": in_tok,

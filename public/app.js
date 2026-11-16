@@ -336,28 +336,53 @@ function clientClassifyJob(title, locationRaw, description) {
   if (/\bhybrid\b/i.test(combined)) work_mode = 'Hybrid';
   else if (/\b(remote|wfh|work from home)\b/i.test(rawLower)) work_mode = 'Remote';
 
-  let city = 'Remote (India)';
+  let city = '';
   for (const alias of tax.city_aliases || []) {
     const re = new RegExp(alias.pattern, 'i');
-    if (re.test(rawLower) || re.test(combined)) {
+    if (re.test(rawLower)) {
       city = alias.city;
       if (city === 'Remote (India)') work_mode = 'Remote';
       break;
     }
   }
+  if (!city) {
+    for (const alias of tax.city_aliases || []) {
+      const re = new RegExp(alias.pattern, 'i');
+      if (re.test(combined)) {
+        city = alias.city;
+        if (city === 'Remote (India)') work_mode = 'Remote';
+        break;
+      }
+    }
+  }
+  if (!city) {
+    city = 'Remote (India)';
+    work_mode = 'Remote';
+  }
 
   let role_tag = 'Operations & Strategy';
   let confidence = 0.88;
-  let reasoning = 'Matched based on job title and description keywords.';
+  let reasoning = `Matched based on job title and description keywords; location "${locationRaw}" normalized to ${city}.`;
   const tLower = String(title || '').toLowerCase();
   const dLower = String(description || '').toLowerCase();
   for (const rule of tax.role_rules || []) {
     const re = new RegExp(rule.pattern, 'i');
-    if (re.test(tLower) || re.test(dLower)) {
+    if (re.test(tLower)) {
       role_tag = rule.role;
       confidence = rule.confidence;
-      reasoning = rule.reason;
+      reasoning = `${rule.reason} Location "${locationRaw}" normalized to ${city}.`;
       break;
+    }
+  }
+  if (role_tag === 'Operations & Strategy') {
+    for (const rule of tax.role_rules || []) {
+      const re = new RegExp(rule.pattern, 'i');
+      if (re.test(dLower)) {
+        role_tag = rule.role;
+        confidence = Number((rule.confidence - 0.03).toFixed(2));
+        reasoning = `${rule.reason} Location "${locationRaw}" normalized to ${city}.`;
+        break;
+      }
     }
   }
   return { role_tag, city, work_mode, confidence, reasoning };
@@ -691,6 +716,16 @@ function handleClientFallbackApi(method, url, bodyObj = {}) {
   }
 
   if (method === 'POST' && pathName === '/api/tag') {
+    const cleanTitle = String(bodyObj.title || '').trim();
+    if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(cleanTitle)) {
+      return {
+        ok: false,
+        status: 400,
+        data: {
+          error: 'Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.'
+        }
+      };
+    }
     const tag = clientClassifyJob(bodyObj.title, bodyObj.location_raw, bodyObj.description);
     return { ok: true, status: 200, data: tag };
   }
@@ -2141,6 +2176,10 @@ async function previewLlmTagging() {
 
   if (!title || title.length < 2) {
     box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a Job Title first (at least 2 characters) so AI can suggest the right Role and City.</div>`;
+    return;
+  }
+  if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(title)) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.</div>`;
     return;
   }
   if (!location_raw) {

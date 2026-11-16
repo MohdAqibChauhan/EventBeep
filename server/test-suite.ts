@@ -119,7 +119,34 @@ async function main() {
     assert.strictEqual(data.role_tag, 'Product Design (UI/UX)');
     assert.strictEqual(data.city, 'Pune');
     assert.ok(data.confidence >= 0.85);
-    return `'Hinjewadi Phase 2, Pune' -> '${data.city}', Role -> '${data.role_tag}' (Conf: ${data.confidence})`;
+
+    const borivaliRes = await fetchJson('/api/tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Software Engineer Intern',
+        company: 'Mumbai FinTech',
+        location_raw: 'Borivali',
+        description: 'Build web applications at our Baner, Pune or Mumbai office.'
+      })
+    });
+    assert.strictEqual(borivaliRes.status, 200);
+    assert.strictEqual(borivaliRes.data.city, 'Mumbai', 'Borivali must normalize to Mumbai');
+
+    const andheriRes = await fetchJson('/api/tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Software Engineer Intern',
+        company: 'Black Cab',
+        location_raw: 'Andheri',
+        description: 'Build web applications at our Baner, Pune office.'
+      })
+    });
+    assert.strictEqual(andheriRes.status, 200);
+    assert.strictEqual(andheriRes.data.city, 'Mumbai', 'Andheri must normalize to Mumbai');
+
+    return `'Hinjewadi' -> 'Pune', 'Borivali' -> 'Mumbai', 'Andheri' -> 'Mumbai', Role -> '${data.role_tag}'`;
   });
 
   let newlyCreatedJobId = 0;
@@ -350,8 +377,20 @@ async function main() {
     });
     assert.strictEqual(badPhoneApply.status, 400);
 
+    const seniorTagRes = await fetchJson('/api/tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Senior Software Engineer',
+        company: 'Black Cab',
+        location_raw: 'Andheri',
+        description: 'Test senior rejection'
+      })
+    });
+    assert.strictEqual(seniorTagRes.status, 400, 'Senior title must be rejected on /api/tag');
+
     await fetchJson(`/api/auth/users/${regOk.data.user.id}`, { method: 'DELETE' });
-    return `Verified ACCOUNT_NOT_FOUND, ROLE_MISMATCH, WEAK_PASSWORD, EMAIL_EXISTS, bad phone rejection & new user registration/login`;
+    return `Verified ACCOUNT_NOT_FOUND, ROLE_MISMATCH, WEAK_PASSWORD, EMAIL_EXISTS, Senior role rejection & new user registration/login`;
   });
 
   console.log('\n================================================================');

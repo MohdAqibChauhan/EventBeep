@@ -100,18 +100,27 @@ async function callPythonSingleTagger(payload: {
   location_raw: string;
   description: string;
 }) {
+  const directLocCity = normalizeCity(payload.location_raw, '').city;
+  const hasExplicitLocMatch =
+    directLocCity !== 'Remote (India)' || /\b(remote|wfh|work from home|anywhere)\b/i.test(payload.location_raw);
+
   const scriptPath = path.join(process.cwd(), 'tagger', 'tag_jobs.py');
   try {
     const { stdout } = await execFileAsync('python', [scriptPath, '--single', JSON.stringify(payload)], {
       timeout: 12000
     });
-    return JSON.parse(stdout.trim());
+    const pyRes = JSON.parse(stdout.trim());
+    if (hasExplicitLocMatch && pyRes.city !== directLocCity) {
+      pyRes.city = directLocCity;
+      pyRes.reasoning = `Role classified as ${pyRes.role_tag}; location "${payload.location_raw}" normalized directly to ${directLocCity}.`;
+    }
+    return pyRes;
   } catch {
     const apiKey = (process.env.GEMINI_API_KEY || '').trim();
     const model = (process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim();
     if (apiKey) {
       try {
-        const prompt = `Classify this Indian fresher/internship job into role_tag (${JSON.stringify(ROLE_TAXONOMY)}) and city (${JSON.stringify(CANONICAL_CITIES)}). Return JSON with keys role_tag, city, confidence, reasoning:\n${JSON.stringify(payload)}`;
+        const prompt = `Classify this Indian fresher/internship job into role_tag (${JSON.stringify(ROLE_TAXONOMY)}) and city (${JSON.stringify(CANONICAL_CITIES)}). Always prioritize location_raw over description when determining city (e.g. Borivali/Andheri/Powai -> Mumbai, Baner/Hinjewadi -> Pune, Koramangala/HSR -> Bengaluru). Return JSON with keys role_tag, city, confidence, reasoning:\n${JSON.stringify(payload)}`;
         const r = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
           {
@@ -129,15 +138,22 @@ async function callPythonSingleTagger(payload: {
           const parsed = JSON.parse(text);
           const item = Array.isArray(parsed) ? parsed[0] : parsed;
           if (item?.role_tag) {
+            const resolvedRole = ROLE_TAXONOMY.includes(item.role_tag)
+              ? item.role_tag
+              : classifyRoleRuleBased(payload.title, payload.description).role_tag;
+            const llmCity = CANONICAL_CITIES.includes(item.city)
+              ? item.city
+              : normalizeCity(payload.location_raw, payload.description).city;
+            const resolvedCity = hasExplicitLocMatch ? directLocCity : llmCity;
+            const resolvedReason =
+              hasExplicitLocMatch && llmCity !== directLocCity
+                ? `Role classified as ${resolvedRole}; location "${payload.location_raw}" normalized directly to ${resolvedCity}.`
+                : item.reasoning || 'Tagged live via Gemini AI.';
             return {
-              role_tag: ROLE_TAXONOMY.includes(item.role_tag)
-                ? item.role_tag
-                : classifyRoleRuleBased(payload.title, payload.description).role_tag,
-              city: CANONICAL_CITIES.includes(item.city)
-                ? item.city
-                : normalizeCity(payload.location_raw, payload.description).city,
+              role_tag: resolvedRole,
+              city: resolvedCity,
               confidence: Number(item.confidence || 0.95),
-              reasoning: item.reasoning || 'Tagged live via Gemini AI.',
+              reasoning: resolvedReason,
               tagged_by: 'gemini-llm',
               model,
               input_tokens: d?.usageMetadata?.promptTokenCount || 165,
@@ -152,9 +168,9 @@ async function callPythonSingleTagger(payload: {
     const roleInfo = classifyRoleRuleBased(payload.title, payload.description);
     return {
       role_tag: roleInfo.role_tag,
-      city,
+      city: hasExplicitLocMatch ? directLocCity : city,
       confidence: roleInfo.confidence,
-      reasoning: roleInfo.reasoning,
+      reasoning: `${roleInfo.reasoning} Location "${payload.location_raw}" normalized to ${hasExplicitLocMatch ? directLocCity : city}.`,
       tagged_by: 'hybrid-llm-rules',
       model,
       input_tokens: 165,
@@ -481,11 +497,17 @@ const ROLE_DISPLAY_NAME: Record<string, string> = {
 
 app.post('/api/tag', async (req, res) => {
   const { title, company, location_raw, description } = req.body || {};
-  if (!title || String(title).trim().length < 2) {
+  const cleanTitle = String(title || '').trim();
+  if (!cleanTitle || cleanTitle.length < 2) {
     return res.status(400).json({ error: 'Please enter a valid Job Title (at least 2 characters) to preview AI tags.' });
   }
+  if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(cleanTitle)) {
+    return res.status(400).json({
+      error: 'Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.'
+    });
+  }
   const result = await callPythonSingleTagger({
-    title: String(title).trim(),
+    title: cleanTitle,
     company: String(company || 'Startup').trim(),
     location_raw: String(location_raw || 'India').trim(),
     description: String(description || '').trim()
