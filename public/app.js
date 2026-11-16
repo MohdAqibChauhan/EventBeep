@@ -238,18 +238,32 @@ function setText(id, val) {
 }
 
 async function apiGet(url) {
-  const res = await fetch(url);
-  return res.json();
+  try {
+    const res = await fetch(url);
+    return await res.json();
+  } catch {
+    return {};
+  }
 }
 
 async function apiPost(url, bodyObj = {}) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(bodyObj)
-  });
-  const data = await res.json();
-  return { ok: res.ok, status: res.status, data };
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyObj)
+    });
+    const text = await res.text();
+    let data = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { error: text || `Request failed (${res.status})` };
+    }
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, status: 500, data: { error: err?.message || 'Network error' } };
+  }
 }
 
 function renderKpiBox(label, value, sub, variant = '') {
@@ -413,6 +427,11 @@ function initLiveStreamAndScrollListener() {
     sseConnection.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
+        if (msg.type === 'connected' && msg.serverless) {
+          sseConnection.close();
+          sseConnection = null;
+          return;
+        }
         if (msg.type === 'new_job' && msg.payload?.job) {
           const newJob = msg.payload.job;
           loadMeta();
@@ -435,6 +454,23 @@ function initLiveStreamAndScrollListener() {
       } catch {}
     };
   } catch {}
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'beep_latest_live_job' && e.newValue) {
+      try {
+        const parsed = JSON.parse(e.newValue);
+        const newJob = parsed?.job;
+        if (newJob && state.isAuthenticated && state.currentUser?.role === 'user') {
+          const alreadyLoaded = state.loadedJobs.some((j) => j.id === newJob.id);
+          const alreadyPending = state.pendingLiveJobs.some((j) => j.id === newJob.id);
+          if (!alreadyLoaded && !alreadyPending) {
+            state.pendingLiveJobs.push(newJob);
+            updateLiveScrollToast();
+          }
+        }
+      } catch {}
+    }
+  });
 
   window.addEventListener(
     'scroll',
@@ -1298,6 +1334,9 @@ async function submitRecruiterJob(e) {
       <button class="btn-ig-blue" style="padding:6px 14px; font-size:0.78rem;" onclick="switchTab('recruiter-manage')">View My Posted Jobs →</button>
     </div>
   `;
+  try {
+    localStorage.setItem('beep_latest_live_job', JSON.stringify({ job: data.job, ts: Date.now() }));
+  } catch {}
   await loadMeta();
   await loadRecruiterJobs();
 }

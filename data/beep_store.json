@@ -61,7 +61,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 3,
+      "views_count": 4,
       "apply_clicks": 0
     },
     {
@@ -96,7 +96,7 @@
       "tagged_by": "gemini-llm",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 2,
+      "views_count": 3,
       "apply_clicks": 0
     },
     {
@@ -132,7 +132,7 @@
       "is_fresher": true,
       "posted_by": 2,
       "has_external_url": false,
-      "views_count": 2,
+      "views_count": 3,
       "apply_clicks": 0
     },
     {
@@ -168,8 +168,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 35,
-      "apply_clicks": 12
+      "views_count": 38,
+      "apply_clicks": 14
     },
     {
       "id": 2,
@@ -203,8 +203,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 42,
-      "apply_clicks": 15
+      "views_count": 45,
+      "apply_clicks": 17
     },
     {
       "id": 3,
@@ -238,7 +238,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 47,
+      "views_count": 48,
       "apply_clicks": 16
     },
     {
@@ -417,7 +417,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 82,
+      "views_count": 83,
       "apply_clicks": 31
     },
     {
@@ -1276,7 +1276,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 110,
+      "views_count": 111,
       "apply_clicks": 19
     },
     {
@@ -1707,7 +1707,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 54,
+      "views_count": 55,
       "apply_clicks": 13
     },
     {
@@ -2812,7 +2812,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 131,
+      "views_count": 132,
       "apply_clicks": 22
     },
     {
@@ -3276,7 +3276,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 82,
+      "views_count": 83,
       "apply_clicks": 19
     },
     {
@@ -3706,7 +3706,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 26,
+      "views_count": 27,
       "apply_clicks": 13
     },
     {
@@ -4674,7 +4674,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 75,
+      "views_count": 76,
       "apply_clicks": 10
     },
     {
@@ -5821,7 +5821,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 19,
+      "views_count": 20,
       "apply_clicks": 22
     },
     {
@@ -5928,7 +5928,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 40,
+      "views_count": 41,
       "apply_clicks": 31
     },
     {
@@ -5964,7 +5964,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 47,
+      "views_count": 48,
       "apply_clicks": 34
     },
     {
@@ -6000,7 +6000,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 54,
+      "views_count": 55,
       "apply_clicks": 37
     },
     {
@@ -6036,7 +6036,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 61,
+      "views_count": 62,
       "apply_clicks": 40
     },
     {
@@ -6428,7 +6428,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 138,
+      "views_count": 139,
       "apply_clicks": 31
     },
     {
@@ -7893,7 +7893,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 145,
+      "views_count": 146,
       "apply_clicks": 28
     },
     {
@@ -7929,7 +7929,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 152,
+      "views_count": 153,
       "apply_clicks": 31
     },
     {
@@ -10279,7 +10279,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 54,
+      "views_count": 55,
       "apply_clicks": 19
     },
     {
@@ -10314,7 +10314,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 61,
+      "views_count": 62,
       "apply_clicks": 22
     },
     {
@@ -10350,7 +10350,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 68,
+      "views_count": 69,
       "apply_clicks": 25
     },
     {
@@ -10764,134 +10764,6 @@
   ],
   "tag_corrections": [
     {
-      "id": 12,
-      "job_id": 5,
-      "job_title": "Analyst, Banking Alliances",
-      "company": "Razorpay",
-      "previous_role": "Finance & Analyst",
-      "previous_city": "Chennai",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T11:13:13.353Z"
-    },
-    {
-      "id": 11,
-      "job_id": 5,
-      "job_title": "Analyst, Banking Alliances",
-      "company": "Razorpay",
-      "previous_role": "Finance & Analyst",
-      "previous_city": "Chennai",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T11:08:15.265Z"
-    },
-    {
-      "id": 10,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T10:49:38.955Z"
-    },
-    {
-      "id": 9,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T10:44:23.748Z"
-    },
-    {
-      "id": 8,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T10:09:41.339Z"
-    },
-    {
-      "id": 7,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T09:58:24.489Z"
-    },
-    {
-      "id": 6,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T09:49:00.726Z"
-    },
-    {
-      "id": 5,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T09:46:19.778Z"
-    },
-    {
       "id": 4,
       "job_id": 300,
       "job_title": "Live Streamed AI Engineer Intern",
@@ -10906,38 +10778,6 @@
       "by_user_role": "user",
       "status": "pending",
       "created_at": "2026-11-16T09:34:02.821Z"
-    },
-    {
-      "id": 3,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T09:30:04.990Z"
-    },
-    {
-      "id": 2,
-      "job_id": 5,
-      "job_title": "Engineer, Product Security — Intern / Trainee Track",
-      "company": "Druva",
-      "previous_role": "Software Engineering",
-      "previous_city": "Pune",
-      "corrected_role": "Product Design (UI/UX)",
-      "corrected_city": "Bengaluru",
-      "reason": "Automated test verification of tag feedback pipeline",
-      "by_user_id": 1,
-      "by_user_name": "Mohdaqib (Student)",
-      "by_user_role": "user",
-      "status": "dismissed",
-      "created_at": "2026-11-16T09:07:28.182Z"
     },
     {
       "id": 1,
@@ -13214,98 +13054,6 @@
       "cover_note": "Direct application test for recruiters without a company website.",
       "status": "Shortlisted",
       "applied_at": "2026-11-16T11:13:13.514Z"
-    },
-    {
-      "id": 7,
-      "job_id": 2,
-      "job_title": "Product Design (UI/UX) Intern — AI School",
-      "company": "Beep Careers (EventBeep)",
-      "role_tag": "Product Design (UI/UX)",
-      "city": "Pune",
-      "student_id": 1,
-      "student_name": "Siddharth Joshi",
-      "student_email": "test.applicant.1794827295381@pict.edu",
-      "student_phone": "+91 98111 22334",
-      "college": "PICT Pune",
-      "graduation_year": "2026",
-      "resume_url": "https://github.com/siddharth",
-      "skills": [
-        "Figma",
-        "UI/UX",
-        "React"
-      ],
-      "cover_note": "Direct application test for recruiters without a company website.",
-      "status": "Shortlisted",
-      "applied_at": "2026-11-16T11:08:15.381Z"
-    },
-    {
-      "id": 6,
-      "job_id": 2,
-      "job_title": "Product Design (UI/UX) Intern — AI School",
-      "company": "Beep Careers (EventBeep)",
-      "role_tag": "Product Design (UI/UX)",
-      "city": "Pune",
-      "student_id": 1,
-      "student_name": "Siddharth Joshi",
-      "student_email": "test.applicant.1794826179106@pict.edu",
-      "student_phone": "+91 98111 22334",
-      "college": "PICT Pune",
-      "graduation_year": "2026",
-      "resume_url": "https://github.com/siddharth",
-      "skills": [
-        "Figma",
-        "UI/UX",
-        "React"
-      ],
-      "cover_note": "Direct application test for recruiters without a company website.",
-      "status": "Shortlisted",
-      "applied_at": "2026-11-16T10:49:39.108Z"
-    },
-    {
-      "id": 5,
-      "job_id": 2,
-      "job_title": "Product Design (UI/UX) Intern — AI School",
-      "company": "Beep Careers (EventBeep)",
-      "role_tag": "Product Design (UI/UX)",
-      "city": "Pune",
-      "student_id": 1,
-      "student_name": "Siddharth Joshi",
-      "student_email": "test.applicant.1794825864022@pict.edu",
-      "student_phone": "+91 98111 22334",
-      "college": "PICT Pune",
-      "graduation_year": "2026",
-      "resume_url": "https://github.com/siddharth",
-      "skills": [
-        "Figma",
-        "UI/UX",
-        "React"
-      ],
-      "cover_note": "Direct application test for recruiters without a company website.",
-      "status": "Shortlisted",
-      "applied_at": "2026-11-16T10:44:24.024Z"
-    },
-    {
-      "id": 4,
-      "job_id": 2,
-      "job_title": "Product Design (UI/UX) Intern — AI School",
-      "company": "Beep Careers (EventBeep)",
-      "role_tag": "Product Design (UI/UX)",
-      "city": "Pune",
-      "student_id": 1,
-      "student_name": "Siddharth Joshi",
-      "student_email": "test.applicant.1794823781614@pict.edu",
-      "student_phone": "+91 98111 22334",
-      "college": "PICT Pune",
-      "graduation_year": "2026",
-      "resume_url": "https://github.com/siddharth",
-      "skills": [
-        "Figma",
-        "UI/UX",
-        "React"
-      ],
-      "cover_note": "Direct application test for recruiters without a company website.",
-      "status": "Hired",
-      "applied_at": "2026-11-16T10:09:41.617Z"
     },
     {
       "id": 1,

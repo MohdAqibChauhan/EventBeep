@@ -1,8 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-const taxonomyPath = path.join(process.cwd(), 'config', 'taxonomy.json');
-const taxonomyData = JSON.parse(fs.readFileSync(taxonomyPath, 'utf8'));
+import taxonomyData from '../config/taxonomy.json';
 
 export const ROLE_TAXONOMY: string[] = taxonomyData.roles;
 export type CanonicalRole = string;

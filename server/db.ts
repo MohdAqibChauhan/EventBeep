@@ -3,6 +3,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import seedStoreJson from '../data/beep_store.json';
 import { runCollectorsAndDedupe } from './collectors';
 import { buildHandChecked50 } from './eval-generator';
 import { StoreSchema, Profile, PipelineRun } from './types';
@@ -54,91 +55,97 @@ function escapeCsv(val: unknown): string {
   return s;
 }
 
+export function buildEvalCsvString(store: StoreSchema): string {
+  const evalHeaders = [
+    'Sample #',
+    'Job ID',
+    'Company',
+    'Job Title',
+    'Raw Location',
+    'Source',
+    'LLM Role Tag',
+    'Human Role Tag',
+    'Role Correct',
+    'LLM City Tag',
+    'Human City Tag',
+    'City Correct',
+    'Both Correct',
+    'Confidence',
+    'Audit Notes / Error Analysis'
+  ];
+  const evalRows = store.eval_50.map((s) =>
+    [
+      s.sample_no,
+      s.job_id,
+      s.company,
+      s.title,
+      s.location_raw,
+      s.source,
+      s.llm_role,
+      s.human_role,
+      s.role_correct ? 'TRUE' : 'FALSE',
+      s.llm_city,
+      s.human_city,
+      s.city_correct ? 'TRUE' : 'FALSE',
+      s.both_correct ? 'TRUE' : 'FALSE',
+      s.llm_confidence,
+      s.error_analysis
+    ]
+      .map(escapeCsv)
+      .join(',')
+  );
+  return [evalHeaders.join(','), ...evalRows].join('\n');
+}
+
+export function buildAllJobsCsvString(store: StoreSchema): string {
+  const jobHeaders = [
+    'ID',
+    'Title',
+    'Company',
+    'LLM Role Tag',
+    'Normalized City',
+    'Work Mode',
+    'Job Type',
+    'Stipend / CTC',
+    'Experience',
+    'Raw Location',
+    'Source',
+    'Confidence',
+    'Canonical URL',
+    'Dedupe SHA256 Hash',
+    'Posted At'
+  ];
+  const jobRows = store.jobs.map((j) =>
+    [
+      j.id,
+      j.title,
+      j.company,
+      j.role_tag,
+      j.city,
+      j.work_mode,
+      j.job_type,
+      j.stipend_or_salary,
+      j.experience_required,
+      j.location_raw,
+      j.source,
+      j.confidence,
+      j.canonical_url,
+      j.dedupe_hash,
+      j.posted_at
+    ]
+      .map(escapeCsv)
+      .join(',')
+  );
+  return [jobHeaders.join(','), ...jobRows].join('\n');
+}
+
 export function exportCsvFiles(store: StoreSchema): void {
   try {
     if (!fs.existsSync(RUNTIME_DATA_DIR)) {
       fs.mkdirSync(RUNTIME_DATA_DIR, { recursive: true });
     }
-
-    const evalHeaders = [
-      'Sample #',
-      'Job ID',
-      'Company',
-      'Job Title',
-      'Raw Location',
-      'Source',
-      'LLM Role Tag',
-      'Human Role Tag',
-      'Role Correct',
-      'LLM City Tag',
-      'Human City Tag',
-      'City Correct',
-      'Both Correct',
-      'Confidence',
-      'Audit Notes / Error Analysis'
-    ];
-    const evalRows = store.eval_50.map((s) =>
-      [
-        s.sample_no,
-        s.job_id,
-        s.company,
-        s.title,
-        s.location_raw,
-        s.source,
-        s.llm_role,
-        s.human_role,
-        s.role_correct ? 'TRUE' : 'FALSE',
-        s.llm_city,
-        s.human_city,
-        s.city_correct ? 'TRUE' : 'FALSE',
-        s.both_correct ? 'TRUE' : 'FALSE',
-        s.llm_confidence,
-        s.error_analysis
-      ]
-        .map(escapeCsv)
-        .join(',')
-    );
-    fs.writeFileSync(CSV_50_PATH, [evalHeaders.join(','), ...evalRows].join('\n'), 'utf8');
-
-    const jobHeaders = [
-      'ID',
-      'Title',
-      'Company',
-      'LLM Role Tag',
-      'Normalized City',
-      'Work Mode',
-      'Job Type',
-      'Stipend / CTC',
-      'Experience',
-      'Raw Location',
-      'Source',
-      'Confidence',
-      'Canonical URL',
-      'Dedupe SHA256 Hash',
-      'Posted At'
-    ];
-    const jobRows = store.jobs.map((j) =>
-      [
-        j.id,
-        j.title,
-        j.company,
-        j.role_tag,
-        j.city,
-        j.work_mode,
-        j.job_type,
-        j.stipend_or_salary,
-        j.experience_required,
-        j.location_raw,
-        j.source,
-        j.confidence,
-        j.canonical_url,
-        j.dedupe_hash,
-        j.posted_at
-      ]
-        .map(escapeCsv)
-        .join(',')
-    );
-    fs.writeFileSync(CSV_ALL_PATH, [jobHeaders.join(','), ...jobRows].join('\n'), 'utf8');
+    fs.writeFileSync(CSV_50_PATH, buildEvalCsvString(store), 'utf8');
+    fs.writeFileSync(CSV_ALL_PATH, buildAllJobsCsvString(store), 'utf8');
   } catch {}
 }
 
@@ -324,6 +331,18 @@ export async function initStore(): Promise<StoreSchema> {
     }
   }
 
+  if (seedStoreJson && Array.isArray((seedStoreJson as any).jobs) && (seedStoreJson as any).jobs.length >= 200) {
+    const cloned = JSON.parse(JSON.stringify(seedStoreJson)) as StoreSchema;
+    if (!Array.isArray(cloned.applications) || cloned.applications.length === 0) {
+      cloned.applications = defaultSeedApplications();
+    }
+    cloned.meta.pg_connected = pgConnected;
+    memoryStore = cloned;
+    saveStore(cloned);
+    await syncToPostgresIfAvailable(cloned);
+    return cloned;
+  }
+
   const startMs = Date.now();
   const collected = await runCollectorsAndDedupe([]);
 
@@ -415,6 +434,13 @@ export async function initStore(): Promise<StoreSchema> {
 
 export function getStore(): StoreSchema {
   if (!memoryStore) {
+    if (seedStoreJson && Array.isArray((seedStoreJson as any).jobs)) {
+      memoryStore = JSON.parse(JSON.stringify(seedStoreJson)) as StoreSchema;
+      if (!Array.isArray(memoryStore.applications) || memoryStore.applications.length === 0) {
+        memoryStore.applications = defaultSeedApplications();
+      }
+      return memoryStore;
+    }
     throw new Error('Store not initialized');
   }
   return memoryStore;

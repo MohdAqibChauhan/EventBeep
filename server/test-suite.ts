@@ -206,6 +206,7 @@ async function main() {
     });
     assert.strictEqual(resolveCorr.status, 200);
     assert.strictEqual(resolveCorr.data.correction.status, 'dismissed');
+    await fetchJson(`/api/admin/corrections/${corrId}`, { method: 'DELETE' });
     return `Created & resolved Tag Correction #${corrId}`;
   });
 
@@ -274,6 +275,7 @@ async function main() {
     });
     assert.strictEqual(statusUpdate.status, 200);
     assert.strictEqual(statusUpdate.data.application.status, 'Shortlisted');
+    await fetchJson(`/api/recruiter/applications/${appId}`, { method: 'DELETE' });
     return `Student applied on Beep (#${appId}), Recruiter viewed contact details & updated status to 'Shortlisted'`;
   });
 

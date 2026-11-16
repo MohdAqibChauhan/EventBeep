@@ -7,7 +7,15 @@ import jwt from 'jsonwebtoken';
 import cron from 'node-cron';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { initStore, getStore, saveStore, syncToPostgresIfAvailable, buildPipelineRunRecord } from './db';
+import {
+  initStore,
+  getStore,
+  saveStore,
+  syncToPostgresIfAvailable,
+  buildPipelineRunRecord,
+  buildEvalCsvString,
+  buildAllJobsCsvString
+} from './db';
 import { runCollectorsAndDedupe } from './collectors';
 import { canonicalizeUrl, checkDuplicate, computeDedupeHash } from './dedupe';
 import { CANONICAL_CITIES, classifyRoleRuleBased, normalizeCity, ROLE_TAXONOMY } from './taxonomy';
@@ -69,7 +77,16 @@ app.get('/api/stream', (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders?.();
 
-  res.write(`data: ${JSON.stringify({ type: 'connected', timestamp: new Date().toISOString() })}\n\n`);
+  res.write(
+    `data: ${JSON.stringify({
+      type: 'connected',
+      serverless: Boolean(process.env.VERCEL),
+      timestamp: new Date().toISOString()
+    })}\n\n`
+  );
+  if (process.env.VERCEL) {
+    return res.end();
+  }
   sseClients.add(res);
 
   req.on('close', () => {
@@ -398,6 +415,16 @@ app.put('/api/recruiter/applications/:id/status', (req, res) => {
   res.json({ ok: true, application: appItem });
 });
 
+app.delete('/api/recruiter/applications/:id', (req, res) => {
+  const store = getStore();
+  const appId = Number(req.params.id);
+  const idx = store.applications.findIndex((a) => a.id === appId);
+  if (idx < 0) return res.status(404).json({ error: 'Application not found' });
+  store.applications.splice(idx, 1);
+  saveStore(store);
+  res.json({ ok: true });
+});
+
 app.post('/api/tag', async (req, res) => {
   const { title, company, location_raw, description } = req.body || {};
   if (!title) {
@@ -689,6 +716,16 @@ app.post('/api/admin/corrections/:id/resolve', (req, res) => {
   res.json({ ok: true, correction: corr });
 });
 
+app.delete('/api/admin/corrections/:id', (req, res) => {
+  const store = getStore();
+  const corrId = Number(req.params.id);
+  const idx = store.tag_corrections.findIndex((c) => c.id === corrId);
+  if (idx < 0) return res.status(404).json({ error: 'Correction not found' });
+  store.tag_corrections.splice(idx, 1);
+  saveStore(store);
+  res.json({ ok: true });
+});
+
 app.post('/api/admin/jobs/:id/moderate', (req, res) => {
   const store = getStore();
   const jobId = Number(req.params.id);
@@ -733,24 +770,18 @@ app.put('/api/eval/:sampleNo', (req, res) => {
   });
 });
 
-function sendCsvExport(res: express.Response, filename: string, downloadName: string) {
-  const tmpPath = path.join('/tmp', filename);
-  const dataPath = path.join(process.cwd(), 'data', filename);
-  const chosenPath = fs.existsSync(tmpPath) ? tmpPath : dataPath;
-  if (fs.existsSync(chosenPath)) {
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
-    return res.sendFile(chosenPath);
-  }
-  res.status(404).send('CSV not found');
-}
-
 app.get('/api/export/eval-50.csv', (_req, res) => {
-  sendCsvExport(res, 'hand_checked_50_posts.csv', 'beep_50_hand_checked_eval.csv');
+  const store = getStore();
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="beep_50_hand_checked_eval.csv"');
+  res.send(buildEvalCsvString(store));
 });
 
 app.get('/api/export/all-jobs.csv', (_req, res) => {
-  sendCsvExport(res, 'all_200_plus_jobs.csv', 'beep_all_200_plus_fresher_jobs.csv');
+  const store = getStore();
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="beep_all_200_plus_fresher_jobs.csv"');
+  res.send(buildAllJobsCsvString(store));
 });
 
 app.get('*', (_req, res) => {
@@ -777,4 +808,8 @@ if (!process.env.VERCEL) {
   });
 }
 
+(app as any).default = app;
+if (typeof module !== 'undefined') {
+  module.exports = app;
+}
 export default app;
