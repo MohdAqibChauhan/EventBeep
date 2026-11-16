@@ -415,14 +415,16 @@ function initLiveStreamAndScrollListener() {
         const msg = JSON.parse(event.data);
         if (msg.type === 'new_job' && msg.payload?.job) {
           const newJob = msg.payload.job;
-          const alreadyLoaded = state.loadedJobs.some((j) => j.id === newJob.id);
-          const alreadyPending = state.pendingLiveJobs.some((j) => j.id === newJob.id);
-          if (!alreadyLoaded && !alreadyPending) {
-            state.pendingLiveJobs.push(newJob);
-            updateLiveScrollToast();
-            loadMeta();
-            if (state.currentUser?.role === 'admin' && state.currentTab === 'admin-pipeline') {
-              loadAdminOverview();
+          loadMeta();
+          if (state.currentUser?.role === 'admin' && state.currentTab === 'admin-pipeline') {
+            loadAdminOverview();
+          }
+          if (state.isAuthenticated && state.currentUser?.role === 'user') {
+            const alreadyLoaded = state.loadedJobs.some((j) => j.id === newJob.id);
+            const alreadyPending = state.pendingLiveJobs.some((j) => j.id === newJob.id);
+            if (!alreadyLoaded && !alreadyPending) {
+              state.pendingLiveJobs.push(newJob);
+              updateLiveScrollToast();
             }
           }
         } else if (msg.type === 'new_application' && state.currentUser?.role === 'recruiter') {
@@ -463,20 +465,28 @@ function updateLiveScrollToast() {
   const toast = document.getElementById('live-scroll-toast');
   if (!toast) return;
 
-  if (state.pendingLiveJobs.length === 0) {
+  if (!state.isAuthenticated || state.currentUser?.role !== 'user' || state.pendingLiveJobs.length === 0) {
     toast.classList.add('hidden');
   } else {
     const latest = state.pendingLiveJobs[state.pendingLiveJobs.length - 1];
     setText(
       'live-scroll-toast-text',
-      `⚡ New Job Posted: ${latest.title} at ${latest.company} — Scroll down to view!`
+      `⚡ New Job Posted: ${latest.title} at ${latest.company} — Click or scroll down to view!`
     );
     toast.classList.remove('hidden');
   }
 }
 
+async function onClickLiveJobToast() {
+  if (state.currentUser?.role !== 'user') return;
+  if (state.currentTab !== 'explore') {
+    await switchTab('explore');
+  }
+  injectPendingLiveJobsOnScroll(true);
+}
+
 function injectPendingLiveJobsOnScroll(scrollToCard = false) {
-  if (state.pendingLiveJobs.length === 0) return;
+  if (state.currentUser?.role !== 'user' || state.pendingLiveJobs.length === 0) return;
   const grid = document.getElementById('jobs-grid-container');
   if (!grid) return;
 
@@ -486,19 +496,23 @@ function injectPendingLiveJobsOnScroll(scrollToCard = false) {
 
   const cards = Array.from(grid.querySelectorAll('.job-card'));
   let anchorCard = null;
-  for (const c of cards) {
-    const r = c.getBoundingClientRect();
-    if (r.top >= 120 && r.top <= window.innerHeight - 80) {
-      anchorCard = c;
-      break;
+  if (!scrollToCard) {
+    for (const c of cards) {
+      const r = c.getBoundingClientRect();
+      if (r.top >= 120 && r.top <= window.innerHeight - 80) {
+        anchorCard = c;
+        break;
+      }
     }
   }
 
   let firstInsertedEl = null;
   for (const job of jobsToInject) {
-    if (!jobMatchesCurrentFilters(job)) continue;
-    state.loadedJobs.unshift(job);
-    state.totalFiltered += 1;
+    if (!scrollToCard && !jobMatchesCurrentFilters(job)) continue;
+    if (!state.loadedJobs.some((existing) => existing.id === job.id)) {
+      state.loadedJobs.unshift(job);
+      state.totalFiltered += 1;
+    }
 
     const wrapper = document.createElement('div');
     wrapper.innerHTML = renderJobCard(job, false, true).trim();
@@ -701,6 +715,10 @@ function goHomeForRole() {
 function applyRoleLayout(role) {
   const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.user;
   document.body.setAttribute('data-active-role', role);
+  if (role !== 'user') {
+    state.pendingLiveJobs = [];
+  }
+  updateLiveScrollToast();
 
   document.getElementById('nav-for-user').classList.toggle('hidden', role !== 'user');
   document.getElementById('nav-for-recruiter').classList.toggle('hidden', role !== 'recruiter');
