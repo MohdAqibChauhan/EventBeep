@@ -333,15 +333,30 @@ app.post('/api/jobs/:id/apply', (req, res) => {
     cover_note
   } = req.body || {};
 
-  if (!student_name || !student_email || !student_phone) {
-    return res.status(400).json({ error: 'Name, email, and phone number are required.' });
+  if (!student_name || String(student_name).trim().length < 2) {
+    return res.status(400).json({ error: 'Please enter your full name (at least 2 characters).' });
+  }
+  const cleanStudentEmail = String(student_email || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanStudentEmail)) {
+    return res.status(400).json({ error: 'Please enter a valid email address so the recruiter can contact you.' });
+  }
+  const digitsOnlyPhone = String(student_phone || '').replace(/[^0-9]/g, '');
+  if (digitsOnlyPhone.length < 10) {
+    return res.status(400).json({ error: 'Please enter a valid 10-digit mobile / WhatsApp number.' });
+  }
+  const cleanResumeUrl = String(resume_url || '').trim();
+  if (cleanResumeUrl && !/^https?:\/\/.+/i.test(cleanResumeUrl)) {
+    return res.status(400).json({ error: 'Please enter a valid Resume, Portfolio, or GitHub link starting with https:// or http://' });
   }
 
   const existing = store.applications.find(
-    (a) => a.job_id === jobId && a.student_email.toLowerCase() === String(student_email).trim().toLowerCase()
+    (a) => a.job_id === jobId && a.student_email.toLowerCase() === cleanStudentEmail.toLowerCase()
   );
   if (existing) {
-    return res.status(409).json({ error: 'You have already applied to this role.', application: existing });
+    return res.status(409).json({
+      error: 'You have already applied for this role with this email address. You can track your application in the My Applications tab.',
+      application: existing
+    });
   }
 
   const parsedSkills = Array.isArray(skills)
@@ -425,54 +440,176 @@ app.delete('/api/recruiter/applications/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+function mergeClientProfiles(store: ReturnType<typeof getStore>, clientProfiles: unknown) {
+  if (!Array.isArray(clientProfiles)) return;
+  let added = false;
+  for (const cp of clientProfiles) {
+    if (
+      cp &&
+      typeof cp === 'object' &&
+      typeof (cp as any).email === 'string' &&
+      typeof (cp as any).password_hash === 'string' &&
+      typeof (cp as any).name === 'string'
+    ) {
+      const emailLower = (cp as any).email.trim().toLowerCase();
+      if (!store.profiles.some((p) => p.email.toLowerCase() === emailLower)) {
+        const nextId = store.profiles.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+        store.profiles.push({
+          id: Number((cp as any).id) > 3 ? Number((cp as any).id) : nextId,
+          name: String((cp as any).name),
+          email: emailLower,
+          password_hash: String((cp as any).password_hash),
+          role: (cp as any).role === 'recruiter' ? 'recruiter' : 'user',
+          company: (cp as any).company ? String((cp as any).company) : undefined,
+          college: (cp as any).college ? String((cp as any).college) : undefined,
+          created_at: String((cp as any).created_at || new Date().toISOString())
+        });
+        added = true;
+      }
+    }
+  }
+  if (added) {
+    saveStore(store);
+  }
+}
+
+const ROLE_DISPLAY_NAME: Record<string, string> = {
+  user: 'Student',
+  recruiter: 'Recruiter',
+  admin: 'Admin'
+};
+
 app.post('/api/tag', async (req, res) => {
   const { title, company, location_raw, description } = req.body || {};
-  if (!title) {
-    return res.status(400).json({ error: 'Job title is required for LLM tagging.' });
+  if (!title || String(title).trim().length < 2) {
+    return res.status(400).json({ error: 'Please enter a valid Job Title (at least 2 characters) to preview AI tags.' });
   }
   const result = await callPythonSingleTagger({
-    title: String(title),
-    company: String(company || 'Startup'),
-    location_raw: String(location_raw || 'India'),
-    description: String(description || '')
+    title: String(title).trim(),
+    company: String(company || 'Startup').trim(),
+    location_raw: String(location_raw || 'India').trim(),
+    description: String(description || '').trim()
   });
   res.json(result);
 });
 
 app.post('/api/auth/login', (req, res) => {
   const store = getStore();
-  const { email, password } = req.body || {};
-  const user = store.profiles.find((p) => p.email.toLowerCase() === String(email || '').toLowerCase());
-  if (!user || !bcrypt.compareSync(String(password || ''), user.password_hash)) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+  const { email, password, selected_role, client_profiles } = req.body || {};
+  mergeClientProfiles(store, client_profiles);
+
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({
+      error: 'Please enter a valid email address (for example: name@college.edu).',
+      code: 'INVALID_EMAIL'
+    });
   }
+  if (!password || String(password).length === 0) {
+    return res.status(400).json({
+      error: 'Please enter your password to sign in.',
+      code: 'MISSING_PASSWORD'
+    });
+  }
+
+  const user = store.profiles.find((p) => p.email.toLowerCase() === cleanEmail);
+  if (!user) {
+    return res.status(401).json({
+      error: `No account found for "${cleanEmail}" in the database. Please check your email spelling, or click "+ Create New Account" below if you are a new user.`,
+      code: 'ACCOUNT_NOT_FOUND',
+      email: cleanEmail
+    });
+  }
+
+  if (!bcrypt.compareSync(String(password), user.password_hash)) {
+    return res.status(401).json({
+      error: `Incorrect password for "${cleanEmail}". Please double-check your password and try again.`,
+      code: 'WRONG_PASSWORD'
+    });
+  }
+
+  if (selected_role && ['user', 'recruiter', 'admin'].includes(String(selected_role)) && user.role !== selected_role) {
+    const actualLabel = ROLE_DISPLAY_NAME[user.role] || user.role;
+    const selectedLabel = ROLE_DISPLAY_NAME[String(selected_role)] || selected_role;
+    return res.status(403).json({
+      error: `The account "${cleanEmail}" is registered as a ${actualLabel} account, not a ${selectedLabel} account. Please switch to the "${actualLabel}" tab above to sign in.`,
+      code: 'ROLE_MISMATCH',
+      actual_role: user.role
+    });
+  }
+
   res.json(issueAuthResponse(user));
 });
 
 app.post('/api/auth/register', (req, res) => {
   const store = getStore();
-  const { name, email, password, role, company, college } = req.body || {};
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Name, email, and password are required.' });
+  const { name, email, password, role, company, college, client_profiles } = req.body || {};
+  mergeClientProfiles(store, client_profiles);
+
+  const cleanName = String(name || '').trim();
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const rawPassword = String(password || '');
+
+  if (!cleanName || cleanName.length < 2) {
+    return res.status(400).json({
+      error: 'Please enter your full name (at least 2 characters).',
+      code: 'INVALID_NAME'
+    });
   }
-  const cleanEmail = String(email).trim().toLowerCase();
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({
+      error: 'Please enter a valid email address (for example: name@college.edu).',
+      code: 'INVALID_EMAIL'
+    });
+  }
+  if (!rawPassword || rawPassword.length < 6) {
+    return res.status(400).json({
+      error: 'Password must be at least 6 characters long.',
+      code: 'WEAK_PASSWORD'
+    });
+  }
+  if (role === 'admin') {
+    return res.status(403).json({
+      error: 'Admin accounts cannot be self-registered. Please create a Student or Recruiter account.',
+      code: 'ADMIN_NOT_ALLOWED'
+    });
+  }
   if (store.profiles.some((p) => p.email.toLowerCase() === cleanEmail)) {
-    return res.status(400).json({ error: 'Email is already registered.' });
+    return res.status(409).json({
+      error: `An account with "${cleanEmail}" already exists in the database! Please sign in above with your password.`,
+      code: 'EMAIL_EXISTS'
+    });
   }
+
   const validRole: UserRole = role === 'recruiter' ? 'recruiter' : 'user';
+  const nextId = store.profiles.reduce((max, p) => Math.max(max, p.id), 0) + 1;
   const newProfile: Profile = {
-    id: store.profiles.length + 1,
-    name: String(name).trim(),
+    id: nextId,
+    name: cleanName,
     email: cleanEmail,
-    password_hash: bcrypt.hashSync(String(password), 8),
+    password_hash: bcrypt.hashSync(rawPassword, 8),
     role: validRole,
-    company: company ? String(company) : undefined,
-    college: college ? String(college) : undefined,
+    company: validRole === 'recruiter' ? String(company || `${cleanName.split(' ')[0]}'s Company`).trim() : undefined,
+    college: validRole === 'user' ? String(college || 'Engineering & Management College, India').trim() : undefined,
     created_at: new Date().toISOString()
   };
   store.profiles.push(newProfile);
   saveStore(store);
-  res.json(issueAuthResponse(newProfile));
+  res.json({
+    ...issueAuthResponse(newProfile),
+    profile_record: newProfile
+  });
+});
+
+app.delete('/api/auth/users/:id', (req, res) => {
+  const store = getStore();
+  const userId = Number(req.params.id);
+  if (userId <= 3) return res.status(403).json({ error: 'Cannot delete core seed accounts' });
+  const idx = store.profiles.findIndex((p) => p.id === userId);
+  if (idx < 0) return res.status(404).json({ error: 'User not found' });
+  store.profiles.splice(idx, 1);
+  saveStore(store);
+  res.json({ ok: true });
 });
 
 app.post('/api/auth/switch-role', (req, res) => {
@@ -514,16 +651,24 @@ app.post('/api/jobs/:id/report-tag', (req, res) => {
   if (!job) return res.status(404).json({ error: 'Job not found' });
 
   const { corrected_role, corrected_city, reason, user_id, user_name, user_role } = req.body || {};
+  const nextRole = corrected_role || job.role_tag;
+  const nextCity = corrected_city || job.city;
+  if (nextRole === job.role_tag && nextCity === job.city) {
+    return res.status(400).json({ error: 'Please select a different Role or City tag before submitting a suggestion.' });
+  }
+  if (!reason || String(reason).trim().length < 4) {
+    return res.status(400).json({ error: 'Please enter a short note explaining why this tag should be changed.' });
+  }
   const correction = {
-    id: store.tag_corrections.length + 1,
+    id: store.tag_corrections.reduce((max, c) => Math.max(max, c.id), 0) + 1,
     job_id: job.id,
     job_title: job.title,
     company: job.company,
     previous_role: job.role_tag,
     previous_city: job.city,
-    corrected_role: corrected_role || job.role_tag,
-    corrected_city: corrected_city || job.city,
-    reason: String(reason || 'User suggested tag improvement'),
+    corrected_role: nextRole,
+    corrected_city: nextCity,
+    reason: String(reason).trim(),
     by_user_id: Number(user_id || 1),
     by_user_name: String(user_name || 'Mohdaqib (Student)'),
     by_user_role: (user_role as UserRole) || 'user',
@@ -563,17 +708,34 @@ app.post('/api/recruiter/jobs', async (req, res) => {
     stipend_or_salary,
     experience_required,
     skills,
-    auto_approve
+    auto_approve,
+    posted_by
   } = req.body || {};
 
-  if (!title || !company || !location_raw) {
-    return res.status(400).json({ error: 'Title, company, and location are required.' });
+  const cleanTitle = String(title || '').trim();
+  const cleanCompany = String(company || '').trim();
+  const cleanLocation = String(location_raw || '').trim();
+  const cleanUrl = String(url || '').trim();
+
+  if (!cleanTitle || cleanTitle.length < 3) {
+    return res.status(400).json({ error: 'Please enter a valid Job Title (at least 3 characters).' });
+  }
+  if (!cleanCompany || cleanCompany.length < 2) {
+    return res.status(400).json({ error: 'Please enter your Company or Startup name.' });
+  }
+  if (!cleanLocation || cleanLocation.length < 2) {
+    return res.status(400).json({ error: 'Please enter the job City or Location (for example: Baner, Pune or Remote).' });
+  }
+  if (cleanUrl && !/^https?:\/\/.+/i.test(cleanUrl)) {
+    return res.status(400).json({
+      error: 'Career Page Link must start with https:// or http:// (or leave it blank to collect student applications directly on Beep).'
+    });
   }
 
   const tagResult = await callPythonSingleTagger({
-    title: String(title),
-    company: String(company),
-    location_raw: String(location_raw),
+    title: cleanTitle,
+    company: cleanCompany,
+    location_raw: cleanLocation,
     description: String(description || '')
   });
 
@@ -639,7 +801,7 @@ app.post('/api/recruiter/jobs', async (req, res) => {
     llm_reasoning: tagResult.reasoning,
     tagged_by: tagResult.tagged_by || 'gemini-llm',
     is_fresher: true,
-    posted_by: 2,
+    posted_by: Number(posted_by || 2),
     has_external_url: hasExternalUrl,
     views_count: 0,
     apply_clicks: 0

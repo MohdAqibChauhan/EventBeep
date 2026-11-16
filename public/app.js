@@ -223,6 +223,44 @@ const FRIENDLY_TRIGGER_LABELS = {
 let searchDebounce = null;
 let sseConnection = null;
 let lastScrollY = 0;
+let feedbackToastTimer = null;
+let reportOriginalRole = '';
+let reportOriginalCity = '';
+
+function showFeedbackToast(msg, isError = false) {
+  const el = document.getElementById('action-feedback-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.background = isError ? '#991B1B' : '#171722';
+  el.style.color = isError ? '#FFFFFF' : '#FFE01B';
+  el.style.borderColor = isError ? '#FCA5A5' : '#FFE01B';
+  el.classList.remove('hidden');
+  clearTimeout(feedbackToastTimer);
+  feedbackToastTimer = setTimeout(() => {
+    el.classList.add('hidden');
+  }, 4000);
+}
+
+function getLocalRegisteredProfiles() {
+  try {
+    const raw = localStorage.getItem('beep_registered_profiles');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalRegisteredProfile(profileRecord) {
+  if (!profileRecord || !profileRecord.email) return;
+  try {
+    const existing = getLocalRegisteredProfiles().filter(
+      (p) => String(p.email).toLowerCase() !== String(profileRecord.email).toLowerCase()
+    );
+    existing.push(profileRecord);
+    localStorage.setItem('beep_registered_profiles', JSON.stringify(existing));
+  } catch {}
+}
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -630,7 +668,7 @@ function showLoginScreen() {
   document.getElementById('app-shell').classList.add('hidden');
 }
 
-function selectLoginRole(role) {
+function selectLoginRole(role, preserveInputs = false) {
   state.selectedLoginRole = role;
   document.getElementById('ltab-user').classList.toggle('active', role === 'user');
   document.getElementById('ltab-recruiter').classList.toggle('active', role === 'recruiter');
@@ -640,9 +678,19 @@ function selectLoginRole(role) {
   const passInput = document.getElementById('login-page-password');
   const descBox = document.getElementById('login-role-desc');
   const submitBtn = document.getElementById('login-submit-btn');
+  const errEl = document.getElementById('login-error-msg');
+  if (errEl) errEl.classList.add('hidden');
 
-  emailInput.value = '';
-  passInput.value = '';
+  if (!preserveInputs) {
+    emailInput.value = '';
+    passInput.value = '';
+  }
+
+  const regRoleEl = document.getElementById('reg-role');
+  if (regRoleEl && (role === 'user' || role === 'recruiter')) {
+    regRoleEl.value = role;
+    onChangeRegisterRole();
+  }
 
   if (role === 'user') {
     descBox.innerHTML = `<strong>🎓 Student Account:</strong> Explore 300+ verified fresher & internship jobs across India, filter by role and city, save jobs to your shortlist, and apply directly.`;
@@ -656,11 +704,49 @@ function selectLoginRole(role) {
   }
 }
 
+function onChangeRegisterRole() {
+  const regRoleEl = document.getElementById('reg-role');
+  const labelEl = document.getElementById('reg-org-label');
+  const inputEl = document.getElementById('reg-org');
+  if (!regRoleEl || !labelEl || !inputEl) return;
+  if (regRoleEl.value === 'recruiter') {
+    labelEl.textContent = 'Company / Startup Name';
+    inputEl.placeholder = 'e.g. TechNova AI / Beep';
+  } else {
+    labelEl.textContent = 'College / University';
+    inputEl.placeholder = 'e.g. PICT Pune / COEP';
+  }
+}
+
 function toggleRegisterMode() {
   const regForm = document.getElementById('main-register-form');
   const isHidden = regForm.classList.contains('hidden');
   regForm.classList.toggle('hidden', !isHidden);
   setText('toggle-reg-btn', isHidden ? '✕ Hide Sign Up' : '➕ Create New Account');
+  const regErr = document.getElementById('register-error-msg');
+  if (regErr) regErr.classList.add('hidden');
+}
+
+function openRegisterWithEmail(prefillEmail) {
+  const regForm = document.getElementById('main-register-form');
+  if (regForm && regForm.classList.contains('hidden')) {
+    toggleRegisterMode();
+  }
+  const regEmail = document.getElementById('reg-email');
+  const regName = document.getElementById('reg-name');
+  const regRole = document.getElementById('reg-role');
+  if (regEmail) regEmail.value = prefillEmail || '';
+  if (regRole && (state.selectedLoginRole === 'user' || state.selectedLoginRole === 'recruiter')) {
+    regRole.value = state.selectedLoginRole;
+    onChangeRegisterRole();
+  }
+  if (regName) regName.focus();
+}
+
+async function switchRoleAndRetryLogin(targetRole) {
+  selectLoginRole(targetRole, true);
+  const fakeEvent = { preventDefault: () => {} };
+  await submitLoginPage(fakeEvent);
 }
 
 async function submitLoginPage(e) {
@@ -670,13 +756,59 @@ async function submitLoginPage(e) {
   const errEl = document.getElementById('login-error-msg');
   errEl.classList.add('hidden');
 
-  const { ok, data } = await apiPost('/api/auth/login', { email, password });
-  if (!ok) {
-    errEl.textContent = data.error || 'Invalid email or password';
+  if (!email) {
+    errEl.innerHTML = `⚠️ Please enter your email address before signing in.`;
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.innerHTML = `⚠️ "${escapeHtml(email)}" is not a valid email format. Please enter a valid email (for example: name@college.edu).`;
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (!password) {
+    errEl.innerHTML = `⚠️ Please enter your password to sign in.`;
     errEl.classList.remove('hidden');
     return;
   }
 
+  const submitBtn = document.getElementById('login-submit-btn');
+  const prevBtnText = submitBtn ? submitBtn.textContent : 'Sign In';
+  if (submitBtn) submitBtn.textContent = '⏳ Signing in...';
+
+  const { ok, data } = await apiPost('/api/auth/login', {
+    email,
+    password,
+    selected_role: state.selectedLoginRole,
+    client_profiles: getLocalRegisteredProfiles()
+  });
+
+  if (submitBtn) submitBtn.textContent = prevBtnText;
+
+  if (!ok) {
+    if (data.code === 'ACCOUNT_NOT_FOUND') {
+      errEl.innerHTML = `
+        <div>⚠️ ${escapeHtml(data.error)}</div>
+        ${
+          state.selectedLoginRole !== 'admin'
+            ? `<button type="button" class="btn-ig-yellow" style="margin-top:8px; padding:6px 12px; font-size:0.76rem;" onclick="openRegisterWithEmail('${escapeHtml(email)}')">➕ Create New Account with ${escapeHtml(email)} →</button>`
+            : ''
+        }
+      `;
+    } else if (data.code === 'ROLE_MISMATCH' && data.actual_role) {
+      const roleLabels = { user: '🎓 Student', recruiter: '💼 Recruiter', admin: '🛡️ Admin' };
+      errEl.innerHTML = `
+        <div>⚠️ ${escapeHtml(data.error)}</div>
+        <button type="button" class="btn-ig-yellow" style="margin-top:8px; padding:6px 12px; font-size:0.76rem;" onclick="switchRoleAndRetryLogin('${escapeHtml(data.actual_role)}')">Switch to ${roleLabels[data.actual_role] || data.actual_role} Tab & Sign In →</button>
+      `;
+    } else {
+      errEl.innerHTML = `⚠️ ${escapeHtml(data.error || 'Unable to sign in. Please check your email and password.')}`;
+    }
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  showFeedbackToast(`✅ Welcome back, ${data.user.name.split('(')[0].trim()}!`);
   await enterPortalWithUser(data.user);
 }
 
@@ -686,16 +818,46 @@ async function submitRegisterPage(e) {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   const role = document.getElementById('reg-role').value;
-  const errEl = document.getElementById('login-error-msg');
+  const orgEl = document.getElementById('reg-org');
+  const orgValue = orgEl ? orgEl.value.trim() : '';
+  const errEl = document.getElementById('register-error-msg') || document.getElementById('login-error-msg');
   errEl.classList.add('hidden');
 
-  const { ok, data } = await apiPost('/api/auth/register', { name, email, password, role });
-  if (!ok) {
-    errEl.textContent = data.error || 'Registration failed';
+  if (!name || name.length < 2) {
+    errEl.innerHTML = `⚠️ Please enter your full name (at least 2 characters).`;
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.innerHTML = `⚠️ Please enter a valid email address (for example: rohan@college.edu).`;
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (!password || password.length < 6) {
+    errEl.innerHTML = `⚠️ Password must be at least 6 characters long.`;
     errEl.classList.remove('hidden');
     return;
   }
 
+  const { ok, data } = await apiPost('/api/auth/register', {
+    name,
+    email,
+    password,
+    role,
+    college: role === 'user' ? orgValue : undefined,
+    company: role === 'recruiter' ? orgValue : undefined,
+    client_profiles: getLocalRegisteredProfiles()
+  });
+  if (!ok) {
+    errEl.innerHTML = `⚠️ ${escapeHtml(data.error || 'Registration failed. Please check your details.')}`;
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  if (data.profile_record) {
+    saveLocalRegisteredProfile(data.profile_record);
+  }
+  showFeedbackToast(`🎉 Account created! Welcome to Beep, ${data.user.name}!`);
   await enterPortalWithUser(data.user);
 }
 
@@ -707,6 +869,15 @@ async function enterPortalWithUser(user, isReload = false) {
 
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
+
+  const recCompEl = document.getElementById('rec-company');
+  if (recCompEl && user.role === 'recruiter') {
+    recCompEl.value = user.company || 'Beep Careers';
+  }
+  const applyCollegeEl = document.getElementById('apply-college');
+  if (applyCollegeEl && user.role === 'user' && user.college) {
+    applyCollegeEl.value = user.college;
+  }
 
   applyRoleLayout(user.role);
   await loadSavedJobs();
@@ -867,24 +1038,29 @@ async function loadStudentActivity() {
     }
   }
 
-  const myCorrections = overview.tag_corrections || [];
+  const allCorrections = overview.tag_corrections || [];
+  const myCorrections = allCorrections.filter((c) => c.by_user_id === state.currentUser.id);
   setText('student-corrections-kpi', myCorrections.length);
 
   const tbody = document.getElementById('student-corrections-tbody');
   if (tbody) {
-    tbody.innerHTML = myCorrections
-      .map(
-        (c) => `
-      <tr>
-        <td><strong>${escapeHtml(c.job_title)}</strong><br/><span style="color:#555;">${escapeHtml(c.company)}</span></td>
-        <td>${escapeHtml(c.previous_role)} · 📍 ${escapeHtml(c.previous_city)}</td>
-        <td><strong style="color:#065F46;">${escapeHtml(c.corrected_role)} · 📍 ${escapeHtml(c.corrected_city)}</strong></td>
-        <td>${escapeHtml(c.reason)}</td>
-        <td><span class="badge-ok">${escapeHtml(c.status === 'pending' ? 'Under Review' : c.status === 'applied' ? 'Approved' : 'Reviewed')}</span></td>
-      </tr>
-    `
-      )
-      .join('');
+    if (myCorrections.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:18px; color:#555;">You haven't suggested any tag edits yet. Click <strong>🛠️ Suggest Edit</strong> on any job card if you spot a Role or City tag that could be improved!</td></tr>`;
+    } else {
+      tbody.innerHTML = myCorrections
+        .map(
+          (c) => `
+        <tr>
+          <td><strong>${escapeHtml(c.job_title)}</strong><br/><span style="color:#555;">${escapeHtml(c.company)}</span></td>
+          <td>${escapeHtml(c.previous_role)} · 📍 ${escapeHtml(c.previous_city)}</td>
+          <td><strong style="color:#065F46;">${escapeHtml(c.corrected_role)} · 📍 ${escapeHtml(c.corrected_city)}</strong></td>
+          <td>${escapeHtml(c.reason)}</td>
+          <td><span class="badge-ok">${escapeHtml(c.status === 'pending' ? 'Under Review' : c.status === 'applied' ? 'Approved' : 'Reviewed')}</span></td>
+        </tr>
+      `
+        )
+        .join('');
+    }
   }
 }
 
@@ -1176,6 +1352,11 @@ function openApplyModal(jobId, title, company, city) {
   const shortName = state.currentUser.name.split('(')[0].trim();
   document.getElementById('apply-name').value = shortName;
   document.getElementById('apply-email').value = state.currentUser.email || 'student@eventbeep.com';
+  if (state.currentUser.college) {
+    document.getElementById('apply-college').value = state.currentUser.college;
+  }
+  const applyErr = document.getElementById('apply-error-msg');
+  if (applyErr) applyErr.classList.add('hidden');
   document.getElementById('apply-modal').classList.add('open');
 }
 
@@ -1186,6 +1367,9 @@ function closeApplyModal() {
 async function submitDirectApplication(e) {
   e.preventDefault();
   const jobId = Number(document.getElementById('apply-job-id').value);
+  const errEl = document.getElementById('apply-error-msg');
+  if (errEl) errEl.classList.add('hidden');
+
   const payload = {
     student_id: state.currentUser.id,
     student_name: document.getElementById('apply-name').value.trim(),
@@ -1198,11 +1382,46 @@ async function submitDirectApplication(e) {
     cover_note: document.getElementById('apply-note').value.trim()
   };
 
-  const { ok, data } = await apiPost(`/api/jobs/${jobId}/apply`, payload);
-  closeApplyModal();
-  if (!ok && data.error) {
-    alert(data.error);
+  if (!payload.student_name || payload.student_name.length < 2) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please enter your full name (at least 2 characters).';
+      errEl.classList.remove('hidden');
+    }
+    return;
   }
+  if (!payload.student_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.student_email)) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please enter a valid email address so the recruiter can contact you.';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+  if (payload.student_phone.replace(/[^0-9]/g, '').length < 10) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please enter a valid 10-digit mobile / WhatsApp number.';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+  if (payload.resume_url && !/^https?:\/\/.+/i.test(payload.resume_url)) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please enter a valid Resume, Portfolio, or GitHub link starting with https:// or http://';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const { ok, data } = await apiPost(`/api/jobs/${jobId}/apply`, payload);
+  if (!ok) {
+    if (errEl) {
+      errEl.textContent = `⚠️ ${data.error || 'Could not submit application. Please check your details.'}`;
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+
+  closeApplyModal();
+  showFeedbackToast('🚀 Application submitted! The recruiter can now view your profile & contact details.');
   await loadUserApplicationsList();
   await loadJobs();
   if (state.currentTab === 'student-saved') await loadSavedJobs();
@@ -1270,11 +1489,21 @@ async function previewLlmTagging() {
 
   const box = document.getElementById('rec-llm-preview-box');
   box.classList.remove('hidden');
+
+  if (!title || title.length < 2) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a Job Title first (at least 2 characters) so AI can suggest the right Role and City.</div>`;
+    return;
+  }
+  if (!location_raw) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a Location (for example: Baner, Pune or Remote) to preview city normalization.</div>`;
+    return;
+  }
+
   box.innerHTML = `<strong>✨ Analyzing your job details to suggest the best Role and City...</strong>`;
 
   const { data } = await apiPost('/api/tag', { title, company, location_raw, description });
   if (data.error) {
-    box.innerHTML = `<span style="color:red; font-weight:700;">${escapeHtml(data.error)}</span>`;
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ ${escapeHtml(data.error)}</div>`;
     return;
   }
 
@@ -1308,11 +1537,30 @@ async function submitRecruiterJob(e) {
     job_type: document.getElementById('rec-type').value,
     skills: document.getElementById('rec-skills').value,
     url: urlField ? urlField.value.trim() : '',
-    description: document.getElementById('rec-desc').value.trim()
+    description: document.getElementById('rec-desc').value.trim(),
+    posted_by: state.currentUser?.id || 2
   };
 
   const box = document.getElementById('rec-llm-preview-box');
   box.classList.remove('hidden');
+
+  if (!payload.title || payload.title.length < 3) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a clear Job Title (at least 3 characters) before publishing.</div>`;
+    return;
+  }
+  if (!payload.company || payload.company.length < 2) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter your Company or Startup name before publishing.</div>`;
+    return;
+  }
+  if (!payload.location_raw || payload.location_raw.length < 2) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter the job City or Location (for example: Baner, Pune or Remote).</div>`;
+    return;
+  }
+  if (payload.url && !/^https?:\/\/.+/i.test(payload.url)) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Career Page Link must start with https:// or http:// (or leave it blank to collect student applications directly on Beep).</div>`;
+    return;
+  }
+
   box.innerHTML = `<strong>🚀 Checking for duplicates & publishing your job...</strong>`;
 
   const { ok, data } = await apiPost('/api/recruiter/jobs', payload);
@@ -1320,7 +1568,7 @@ async function submitRecruiterJob(e) {
   if (!ok) {
     box.innerHTML = `
       <div style="color:#991B1B; font-weight:800;">
-        ⚠️ Already Listed: ${escapeHtml(data.error)}
+        ⚠️ ${escapeHtml(data.error || 'Could not publish job. Please check your details.')}
       </div>
     `;
     return;
@@ -1720,11 +1968,15 @@ async function updateEvalSample(sampleNo, newHumanRole, newHumanCity) {
 }
 
 function openReportModal(jobId, title, company, currentRole, currentCity) {
+  reportOriginalRole = currentRole;
+  reportOriginalCity = currentCity;
   document.getElementById('report-job-id').value = jobId;
   setText('report-modal-job-label', `${title} at ${company} (Currently tagged: ${currentRole} · ${currentCity})`);
   document.getElementById('report-role-select').value = currentRole;
   document.getElementById('report-city-select').value = currentCity;
   document.getElementById('report-reason').value = '';
+  const repErr = document.getElementById('report-error-msg');
+  if (repErr) repErr.classList.add('hidden');
   document.getElementById('report-modal').classList.add('open');
 }
 
@@ -1737,7 +1989,9 @@ async function submitTagCorrection(e) {
   const jobId = document.getElementById('report-job-id').value;
   const corrected_role = document.getElementById('report-role-select').value;
   const corrected_city = document.getElementById('report-city-select').value;
-  const reason = document.getElementById('report-reason').value;
+  const reason = document.getElementById('report-reason').value.trim();
+  const errEl = document.getElementById('report-error-msg');
+  if (errEl) errEl.classList.add('hidden');
 
   if (state.currentUser.role === 'admin') {
     await apiPost(`/api/admin/jobs/${jobId}/moderate`, {
@@ -1746,11 +2000,28 @@ async function submitTagCorrection(e) {
       city: corrected_city
     });
     closeReportModal();
+    showFeedbackToast('✅ Job tags updated!');
     await loadJobs();
     return;
   }
 
-  await apiPost(`/api/jobs/${jobId}/report-tag`, {
+  if (corrected_role === reportOriginalRole && corrected_city === reportOriginalCity) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please choose a different Role or City tag before saving your suggestion.';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+
+  if (!reason || reason.length < 4) {
+    if (errEl) {
+      errEl.textContent = '⚠️ Please enter a short note explaining why this tag should be changed.';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const { ok, data } = await apiPost(`/api/jobs/${jobId}/report-tag`, {
     corrected_role,
     corrected_city,
     reason,
@@ -1758,8 +2029,17 @@ async function submitTagCorrection(e) {
     user_name: state.currentUser.name,
     user_role: state.currentUser.role
   });
+
+  if (!ok) {
+    if (errEl) {
+      errEl.textContent = `⚠️ ${data.error || 'Could not submit tag suggestion.'}`;
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
+
   closeReportModal();
-  alert('Thanks! Your tag suggestion has been sent for review.');
+  showFeedbackToast('✅ Thanks! Your tag suggestion has been sent for review.');
 }
 
 window.addEventListener('DOMContentLoaded', initApp);

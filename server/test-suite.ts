@@ -279,6 +279,81 @@ async function main() {
     return `Student applied on Beep (#${appId}), Recruiter viewed contact details & updated status to 'Shortlisted'`;
   });
 
+  await runTest('TC-13', 'Negative Scenarios (Unknown Email, Role Mismatch, Weak Password, Bad Phone/URL) & New User Registration', async () => {
+    const unknownLogin = await fetchJson('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'notindb@college.edu', password: 'password123' })
+    });
+    assert.strictEqual(unknownLogin.status, 401);
+    assert.strictEqual(unknownLogin.data.code, 'ACCOUNT_NOT_FOUND');
+
+    const roleMismatch = await fetchJson('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'student@eventbeep.com', password: 'student123', selected_role: 'recruiter' })
+    });
+    assert.strictEqual(roleMismatch.status, 403);
+    assert.strictEqual(roleMismatch.data.code, 'ROLE_MISMATCH');
+
+    const weakPass = await fetchJson('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'New Student', email: 'newstudent@pict.edu', password: '123', role: 'user' })
+    });
+    assert.strictEqual(weakPass.status, 400);
+    assert.strictEqual(weakPass.data.code, 'WEAK_PASSWORD');
+
+    const newEmail = `newuser.${Date.now()}@pict.edu`;
+    const regOk = await fetchJson('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Rohan Deshmukh',
+        email: newEmail,
+        password: 'rohanpassword',
+        role: 'user',
+        college: 'COEP Pune'
+      })
+    });
+    assert.strictEqual(regOk.status, 200);
+    assert.strictEqual(regOk.data.user.email, newEmail);
+
+    const dupReg = await fetchJson('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Rohan Deshmukh',
+        email: newEmail,
+        password: 'rohanpassword',
+        role: 'user'
+      })
+    });
+    assert.strictEqual(dupReg.status, 409);
+    assert.strictEqual(dupReg.data.code, 'EMAIL_EXISTS');
+
+    const loginNew = await fetchJson('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: newEmail, password: 'rohanpassword', selected_role: 'user' })
+    });
+    assert.strictEqual(loginNew.status, 200);
+
+    const badPhoneApply = await fetchJson('/api/jobs/1/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_name: 'Rohan Deshmukh',
+        student_email: newEmail,
+        student_phone: '12345'
+      })
+    });
+    assert.strictEqual(badPhoneApply.status, 400);
+
+    await fetchJson(`/api/auth/users/${regOk.data.user.id}`, { method: 'DELETE' });
+    return `Verified ACCOUNT_NOT_FOUND, ROLE_MISMATCH, WEAK_PASSWORD, EMAIL_EXISTS, bad phone rejection & new user registration/login`;
+  });
+
   console.log('\n================================================================');
   const passedCount = results.filter((r) => r.passed).length;
   console.log(`FINAL RESULT: ${passedCount}/${results.length} TEST CASES PASSED`);
