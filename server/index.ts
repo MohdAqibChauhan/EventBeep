@@ -363,7 +363,7 @@ app.post('/api/auth/register', (req, res) => {
   if (store.profiles.some((p) => p.email.toLowerCase() === cleanEmail)) {
     return res.status(400).json({ error: 'Email is already registered.' });
   }
-  const validRole: UserRole = ['user', 'recruiter', 'admin'].includes(role) ? role : 'user';
+  const validRole: UserRole = role === 'recruiter' ? 'recruiter' : 'user';
   const newProfile: Profile = {
     id: store.profiles.length + 1,
     name: String(name).trim(),

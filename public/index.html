@@ -54,7 +54,7 @@
           <div class="login-mini-card mc-white">
             <div style="font-family:var(--font-mono); font-size:0.65rem; font-weight:700;">FOR PLATFORM TEAM</div>
             <div style="font-family:var(--font-display); font-weight:900; font-size:1.05rem; margin:4px 0;">🛡️ Admin Dashboard</div>
-            <div style="opacity:0.9;">Sync daily job posts, review removed duplicates, and check AI accuracy & cost metrics.</div>
+            <div style="opacity:0.9;">Sync daily job posts, review removed duplicates, and audit 50-job AI tagging accuracy.</div>
           </div>
         </div>
       </div>
@@ -90,11 +90,11 @@
         <form id="main-login-form" onsubmit="submitLoginPage(event)">
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" id="login-page-email" class="form-control" value="student@eventbeep.com" required />
+            <input type="email" id="login-page-email" class="form-control" placeholder="Enter your email address" required />
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="login-page-password" class="form-control" value="student123" required />
+            <input type="password" id="login-page-password" class="form-control" placeholder="Enter your password" required />
           </div>
 
           <div id="login-error-msg" class="hidden" style="color:#DC2626; font-weight:800; font-size:0.82rem; margin-bottom:10px;"></div>
@@ -105,7 +105,7 @@
         </form>
 
         <div style="margin-top:16px; padding-top:14px; border-top:1.5px solid #E5E4DC; display:flex; justify-content:space-between; align-items:center; font-size:0.78rem;">
-          <span style="color:#555; font-weight:600;">Demo account details are pre-filled for quick sign-in.</span>
+          <span style="color:#555; font-weight:600;">New to Beep? Create a Student or Recruiter account.</span>
           <button type="button" class="btn-flag-tag" onclick="toggleRegisterMode()" id="toggle-reg-btn">
             ➕ Create New Account
           </button>
@@ -131,7 +131,6 @@
             <select id="reg-role" class="form-control">
               <option value="user">🎓 Student / Job Seeker</option>
               <option value="recruiter">💼 Recruiter / Employer</option>
-              <option value="admin">🛡️ Platform Admin</option>
             </select>
           </div>
           <button type="submit" class="btn-ig-yellow" style="width:100%; justify-content:center;">
@@ -197,7 +196,7 @@
             ⚡ Job Sync & Duplicates
           </button>
           <button class="nav-tab" data-tab="admin-eval" onclick="switchTab('admin-eval')">
-            🎯 Accuracy & Cost Report
+            🎯 50-Job Accuracy Audit
           </button>
           <button class="nav-tab" data-tab="admin-moderation" onclick="switchTab('admin-moderation')">
             🛠️ Tag Suggestions <span class="tab-count" id="nav-mod-count">1</span>
@@ -492,7 +491,6 @@
                   <th>Total Scanned</th>
                   <th>Unique Live Jobs</th>
                   <th>Duplicates Removed</th>
-                  <th>AI Cost / 1,000 Jobs</th>
                   <th>Time Taken</th>
                   <th>Completed</th>
                 </tr>
@@ -524,9 +522,9 @@
         <div class="section-card">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
             <div>
-              <div class="section-title">🎯 50-Job Hand-Checked Accuracy & Cost Report</div>
+              <div class="section-title">🎯 50-Job Hand-Checked Accuracy Report</div>
               <p style="color:#444;">
-                We manually verified 50 job posts across roles and cities to measure our AI tagging accuracy and cost per 1,000 posts. You can also update any row below to recalculate accuracy live.
+                We manually verified 50 job posts across roles and cities to measure our AI tagging accuracy. You can also update any row below to recalculate accuracy live.
               </p>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -540,31 +538,6 @@
           </div>
 
           <div class="kpi-grid" id="eval-kpi-grid"></div>
-
-          <div style="background:#12121A; color:#fff; border-radius:14px; padding:20px; margin-bottom:22px; border:2.5px solid var(--beep-yellow);">
-            <h3 style="font-family:var(--font-display); color:var(--beep-yellow); margin-bottom:8px;">
-              💰 How Much Does AI Tagging Cost Per 1,000 Job Posts?
-            </h3>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; font-size:0.85rem;">
-              <div>
-                <strong style="color:#FFE01B;">1. Smart Batching (10 Jobs Per Call):</strong><br />
-                • Grouping 10 jobs into one request shares the instructions across all 10 jobs.<br />
-                • Average Input: <strong>165,000 tokens / 1,000 jobs</strong><br />
-                • Average Output: <strong>42,000 tokens / 1,000 jobs</strong>
-              </div>
-              <div>
-                <strong style="color:#FFE01B;">2. Cost Per 1,000 Jobs (Gemini 3.5 Flash-Lite):</strong><br />
-                • Input tokens cost: <strong>$0.0165</strong><br />
-                • Output tokens cost: <strong>$0.0168</strong><br />
-                • <strong>Total = $0.0333 USD (₹2.81 INR) per 1,000 jobs</strong>
-              </div>
-              <div>
-                <strong style="color:#FFE01B;">3. Actual Out-of-Pocket Spend (₹0.00):</strong><br />
-                • Runs within the Google AI Studio Free Tier.<br />
-                • Already-tagged jobs are saved so daily refreshes only tag newly discovered jobs, saving <strong>86.1%</strong> in token usage.
-              </div>
-            </div>
-          </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
             <h3 style="font-family:var(--font-display); font-weight:800;">🔬 50 Hand-Checked Jobs (AI Tag vs Human Review)</h3>
@@ -642,7 +615,7 @@
         │
         ▼
 [Step 3: AI Role & City Tagging (Python + Google Gemini 3.5 Flash-Lite)]
-   ├─► Groups 10 jobs per request to keep costs at just ₹2.81 ($0.0333) per 1,000 jobs
+   ├─► Groups 10 jobs per request for fast, reliable batch tagging
    ├─► Assigns 1 of 14 Standard Job Roles & 1 of 14 Indian Cities
    └─► Maps local areas (like Baner, Hinjewadi, Koramangala, Gurugram) to their main city
         │
@@ -678,7 +651,7 @@
                   <td><strong>3</strong></td>
                   <td><strong>Older Gemini model version was retired for new keys</strong></td>
                   <td>Calling <code>gemini-2.5-flash-lite</code> with a new AI Studio key returned a <code>404 Not Found</code> error asking to upgrade to <code>gemini-3.5-flash-lite</code>.</td>
-                  <td>Upgraded our Python AI worker to <strong>Gemini 3.5 Flash-Lite</strong> and batched 10 jobs per call, cutting cost by <strong>86.1%</strong> down to <strong>₹2.81 ($0.0333) per 1,000 jobs</strong>.</td>
+                  <td>Upgraded our Python AI worker to <strong>Gemini 3.5 Flash-Lite</strong> and batched 10 jobs per call, reducing token usage by <strong>86.1%</strong>.</td>
                 </tr>
                 <tr>
                   <td><strong>4</strong></td>

@@ -336,7 +336,7 @@ export async function initStore(): Promise<StoreSchema> {
     },
     {
       id: 3,
-      name: 'Saurabh & Mohdaqib (Platform Admin)',
+      name: 'Mohdaqib (Platform Admin)',
       email: 'admin@eventbeep.com',
       password_hash: bcrypt.hashSync('admin123', 8),
       role: 'admin',

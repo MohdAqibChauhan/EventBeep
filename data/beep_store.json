@@ -30,6 +30,42 @@
   ],
   "jobs": [
     {
+      "id": 302,
+      "title": "Gen AI & Full-Stack Intern (2027Batch)",
+      "company": "altamash Careers",
+      "location_raw": "Ajivali",
+      "description": "Build AI-powered career tools, data pipelines, and web applications for college students at our Baner, Pune office.",
+      "url": "https://www.eventbeep.com/direct-apply/1794826057371",
+      "canonical_url": "https://eventbeep.com/direct-apply/1794826057371",
+      "dedupe_hash": "9d147f53a417b088d0ac468a",
+      "source": "EventBeep Direct Recruiter",
+      "source_compliance": "First-party recruiter submission on EventBeep",
+      "job_type": "Internship",
+      "work_mode": "On-site",
+      "stipend_or_salary": "₹35,000 - ₹50,000 / month",
+      "experience_required": "0 yrs (Fresher)",
+      "skills": [
+        "Python",
+        "TypeScript",
+        "Gemini AI",
+        "PostgreSQL"
+      ],
+      "posted_at": "2026-11-16T10:47:37.373Z",
+      "first_seen": "2026-11-16T10:47:37.373Z",
+      "last_seen": "2026-11-16T10:47:37.373Z",
+      "status": "tagged",
+      "role_tag": "Data Science & AI/ML",
+      "city": "Pune",
+      "confidence": 0.95,
+      "llm_reasoning": "The role involves Gen AI and data pipelines targeted at 2027 batch interns based in Baner, Pune.",
+      "tagged_by": "gemini-llm",
+      "is_fresher": true,
+      "posted_by": 2,
+      "has_external_url": false,
+      "views_count": 1,
+      "apply_clicks": 0
+    },
+    {
       "id": 301,
       "title": "Gen AI & Full-Stack Intern (2026 Batch)",
       "company": "Beep Careers",
@@ -132,8 +168,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 40,
-      "apply_clicks": 18
+      "views_count": 41,
+      "apply_clicks": 19
     },
     {
       "id": 2,
@@ -167,8 +203,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 42,
-      "apply_clicks": 16
+      "views_count": 43,
+      "apply_clicks": 17
     },
     {
       "id": 3,
@@ -10799,6 +10835,22 @@
   ],
   "tag_corrections": [
     {
+      "id": 10,
+      "job_id": 5,
+      "job_title": "Engineer, Product Security — Intern / Trainee Track",
+      "company": "Druva",
+      "previous_role": "Software Engineering",
+      "previous_city": "Pune",
+      "corrected_role": "Product Design (UI/UX)",
+      "corrected_city": "Bengaluru",
+      "reason": "Automated test verification of tag feedback pipeline",
+      "by_user_id": 1,
+      "by_user_name": "Mohdaqib (Student)",
+      "by_user_role": "user",
+      "status": "dismissed",
+      "created_at": "2026-11-16T10:49:38.955Z"
+    },
+    {
       "id": 9,
       "job_id": 5,
       "job_title": "Engineer, Product Security — Intern / Trainee Track",
@@ -13099,6 +13151,29 @@
     "llm_model": "gemini-2.5-flash-lite"
   },
   "applications": [
+    {
+      "id": 6,
+      "job_id": 2,
+      "job_title": "Product Design (UI/UX) Intern — AI School",
+      "company": "Beep Careers (EventBeep)",
+      "role_tag": "Product Design (UI/UX)",
+      "city": "Pune",
+      "student_id": 1,
+      "student_name": "Siddharth Joshi",
+      "student_email": "test.applicant.1794826179106@pict.edu",
+      "student_phone": "+91 98111 22334",
+      "college": "PICT Pune",
+      "graduation_year": "2026",
+      "resume_url": "https://github.com/siddharth",
+      "skills": [
+        "Figma",
+        "UI/UX",
+        "React"
+      ],
+      "cover_note": "Direct application test for recruiters without a company website.",
+      "status": "Shortlisted",
+      "applied_at": "2026-11-16T10:49:39.108Z"
+    },
     {
       "id": 5,
       "job_id": 2,

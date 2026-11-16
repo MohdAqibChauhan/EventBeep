@@ -155,7 +155,7 @@ const ROLE_CONFIG = {
     pillColor: '#0F0F12',
     subText: 'Daily Job Sync, Duplicate Removal, 50-Job Accuracy Audit & Tag Review',
     tickerBadge: 'ADMIN DASHBOARD',
-    tickerRight: '94% Role & 96% City Accuracy · Only ₹2.81 ($0.0333) per 1,000 Jobs',
+    tickerRight: '94% Role & 96% City Accuracy · 3-Step Duplicate Removal Active',
     userIcon: '🛡️',
     userLabel: 'Admin',
     heroTitle: 'Beep Admin & Quality Control Center',
@@ -164,7 +164,7 @@ const ROLE_CONFIG = {
       '🛡️ <strong>Platform Admin</strong>',
       '🔄 <strong>300+ Live India Jobs Synced Daily</strong>',
       '🎯 <strong>94% Role & 96% City Accuracy (50 Checked)</strong>',
-      '💰 <strong>₹2.81 ($0.0333) per 1,000 Jobs</strong>'
+      '🧹 <strong>95 Duplicate Posts Automatically Removed</strong>'
     ],
     heroCtas: [
       { cls: 'btn-ig-blue', action: 'triggerManualPipeline()', label: '🔄 Fetch External Job Boards', id: 'hero-refresh-btn' },
@@ -200,7 +200,7 @@ const ROLE_CONFIG = {
         line1: '50-Job Manual Check:',
         hlClass: 'hl-yellow',
         hlText: '94% Role & 96% City.',
-        sub: 'Hand-checked across 50 real posts. AI tagging costs just $0.0333 (₹2.81) per 1,000 jobs.',
+        sub: 'Hand-checked across 50 real posts to verify AI role and city tagging quality.',
         cta: 'OPEN 50-JOB ACCURACY SHEET →',
         action: "switchTab('admin-eval')"
       }
@@ -590,20 +590,17 @@ function selectLoginRole(role) {
   const descBox = document.getElementById('login-role-desc');
   const submitBtn = document.getElementById('login-submit-btn');
 
+  emailInput.value = '';
+  passInput.value = '';
+
   if (role === 'user') {
-    emailInput.value = 'student@eventbeep.com';
-    passInput.value = 'student123';
     descBox.innerHTML = `<strong>🎓 Student Account:</strong> Explore 300+ verified fresher & internship jobs across India, filter by role and city, save jobs to your shortlist, and apply directly.`;
     submitBtn.textContent = '🚀 Sign In as Student →';
   } else if (role === 'recruiter') {
-    emailInput.value = 'recruiter@eventbeep.com';
-    passInput.value = 'recruiter123';
     descBox.innerHTML = `<strong>💼 Recruiter Account:</strong> Post fresher jobs or internships with automatic AI tagging, and view full student applicant profiles, resumes & contact details on one page.`;
     submitBtn.textContent = '💼 Sign In as Recruiter →';
   } else {
-    emailInput.value = 'admin@eventbeep.com';
-    passInput.value = 'admin123';
-    descBox.innerHTML = `<strong>🛡️ Admin Account:</strong> Sync daily job listings, review removed duplicates, check the 50-job accuracy & cost report, and approve tag suggestions.`;
+    descBox.innerHTML = `<strong>🛡️ Admin Account:</strong> Sync daily job listings, review removed duplicates, check the 50-job accuracy report, and approve tag suggestions.`;
     submitBtn.textContent = '🛡️ Sign In as Admin →';
   }
 }
@@ -1459,9 +1456,9 @@ async function loadAdminOverview() {
         `Role (${data.eval_metrics?.role_correct_count}/50) · City (${data.eval_metrics?.city_correct_count}/50)`
       ) +
       renderKpiBox(
-        'COST PER 1,000 JOBS',
-        `₹2.81 <span style="font-size:1rem;">($0.0333)</span>`,
-        'Gemini 3.5 Flash-Lite (₹0 actual spend)'
+        'PUBLIC SOURCES ACTIVE',
+        `${(latestRun.sources_queried || []).length || 24} Boards`,
+        'Official Greenhouse, Remotive, Jobicy & HN Feeds'
       );
   }
 
@@ -1476,7 +1473,6 @@ async function loadAdminOverview() {
         <td>${r.fetched} jobs</td>
         <td><strong>${r.tagged} unique jobs</strong></td>
         <td><strong>${r.duplicates_removed} removed</strong></td>
-        <td><strong>$${r.cost_per_1000_usd} (₹${r.cost_per_1000_inr})</strong></td>
         <td>${(r.duration_ms / 1000).toFixed(1)}s</td>
         <td>${timeAgo(r.finished_at)}</td>
       </tr>
@@ -1586,12 +1582,7 @@ function renderEvalView() {
     renderKpiBox(
       'COMBINED ACCURACY',
       `${metrics.joint_accuracy_pct}%`,
-      `${metrics.both_correct_count} out of ${metrics.total_checked} jobs exact on both role & city`
-    ) +
-    renderKpiBox(
-      'COST PER 1,000 JOBS',
-      `₹2.81 <span style="font-size:1rem;">($0.0333)</span>`,
-      'Batched Gemini 3.5 Flash-Lite (₹0 actual spend)',
+      `${metrics.both_correct_count} out of ${metrics.total_checked} jobs exact on both role & city`,
       'kpi-dark'
     );
 
