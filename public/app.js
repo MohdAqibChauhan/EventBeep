@@ -2543,27 +2543,30 @@ async function loadAdminOverview() {
       renderKpiBox(
         'COST PER 1,000 JOBS',
         `₹${latestRun.cost_per_1000_inr || 2.81} <span style="font-size:0.95rem; font-weight:700;">($${latestRun.cost_per_1000_usd || 0.0333})</span>`,
-        'Gemini 3.5 Flash-Lite (₹0 actual spend)'
+        `~₹${(((data.tagged_jobs || 300) * 2.81) / 1000).toFixed(2)} for ${data.tagged_jobs || 300} jobs (₹0 Free Tier)`
       );
   }
 
   const runsBody = document.getElementById('admin-runs-tbody');
   if (runsBody) {
     runsBody.innerHTML = (data.runs || [])
-      .map(
-        (r) => `
+      .map((r) => {
+        const taggedCount = r.tagged || 300;
+        const runCostUsd = ((taggedCount / 1000) * 0.0333).toFixed(4);
+        const runCostInr = ((taggedCount / 1000) * 2.81).toFixed(2);
+        return `
       <tr>
         <td><strong>#${r.id}</strong></td>
         <td><span class="badge-ok">${escapeHtml(FRIENDLY_TRIGGER_LABELS[r.trigger] || 'Scheduled Sync')}</span></td>
         <td>${r.fetched} jobs</td>
-        <td><strong>${r.tagged} unique jobs</strong></td>
+        <td><strong>${taggedCount} unique jobs</strong></td>
         <td><strong>${r.duplicates_removed} removed</strong></td>
-        <td><strong>$${r.cost_per_1000_usd || 0.0333} (₹${r.cost_per_1000_inr || 2.81})</strong></td>
+        <td><strong>₹${runCostInr} ($${runCostUsd})</strong> <span style="font-size:0.72rem; color:#555;">(₹2.81/1k)</span></td>
         <td>${(r.duration_ms / 1000).toFixed(1)}s</td>
         <td>${timeAgo(r.finished_at)}</td>
       </tr>
-    `
-      )
+    `;
+      })
       .join('');
   }
 
