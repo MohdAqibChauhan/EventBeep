@@ -103,9 +103,17 @@ async function executeFullPipeline(trigger: 'daily-cron' | 'manual-admin'): Prom
   const customRecruiterJobs = store.jobs.filter(
     (j) => j.source === 'EventBeep Direct Recruiter' && j.id > 3
   );
-  const collected = await runCollectorsAndDedupe(customRecruiterJobs);
+  const collected = await runCollectorsAndDedupe([]);
 
-  store.jobs = [...customRecruiterJobs, ...collected.newJobs];
+  let maxId = collected.newJobs.reduce((m, j) => Math.max(m, j.id), 0);
+  for (const rj of customRecruiterJobs) {
+    if (!collected.newJobs.some((nj) => nj.dedupe_hash === rj.dedupe_hash)) {
+      rj.id = ++maxId;
+      collected.newJobs.unshift(rj);
+    }
+  }
+
+  store.jobs = collected.newJobs;
   store.duplicate_logs = collected.duplicates;
   store.eval_50 = buildHandChecked50(store.jobs);
 

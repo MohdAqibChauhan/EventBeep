@@ -2,7 +2,6 @@ import json
 import os
 from collections import Counter
 
-
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     store_path = os.path.join(root_dir, "data", "beep_store.json")
@@ -42,7 +41,6 @@ def main():
         "discrepancies_found": confusions,
     }
     print(json.dumps(report, indent=2))
-
 
 if __name__ == "__main__":
     main()

@@ -34,7 +34,6 @@ Given a batch of Indian fresher / college internship job postings, classify each
 Return ONLY valid JSON matching the array schema.
 """
 
-
 def load_env():
     env_path = os.path.join(ROOT_DIR, ".env")
     if os.path.exists(env_path):
@@ -44,7 +43,6 @@ def load_env():
                 if line and "=" in line:
                     k, v = line.split("=", 1)
                     os.environ.setdefault(k.strip(), v.strip())
-
 
 def normalize_city_py(location_raw: str, description: str = "") -> str:
     raw = (location_raw or "").lower()
@@ -64,7 +62,6 @@ def normalize_city_py(location_raw: str, description: str = "") -> str:
                 return entry["city"]
     return "Remote (India)"
 
-
 def classify_role_py(title: str, description: str = "") -> tuple[str, float, str]:
     t = (title or "").lower()
     d = (description or "").lower()
@@ -75,7 +72,6 @@ def classify_role_py(title: str, description: str = "") -> tuple[str, float, str
         if re.search(rule["pattern"], d, re.I):
             return rule["role"], round(float(rule["confidence"]) - 0.05, 2), f"{rule['reason']} Inferred from description."
     return "Software Engineering", 0.85, "Classified via general technical fresher keywords."
-
 
 def call_gemini_batch(jobs_batch: list[dict], api_key: str, model: str) -> tuple[list[dict], int, int]:
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
@@ -110,7 +106,6 @@ def call_gemini_batch(jobs_batch: list[dict], api_key: str, model: str) -> tuple
         if isinstance(parsed, dict) and "results" in parsed:
             parsed = parsed["results"]
         return parsed, in_tok, out_tok
-
 
 def tag_single_job(payload: dict) -> dict:
     load_env()
@@ -158,7 +153,6 @@ def tag_single_job(payload: dict) -> dict:
         "input_tokens": 165,
         "output_tokens": 42,
     }
-
 
 def run_batch_store_tagger():
     load_env()
@@ -214,7 +208,6 @@ def run_batch_store_tagger():
         "duration_ms": int((time.time() - start_time) * 1000),
     }
     print(json.dumps(summary))
-
 
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "--single":
