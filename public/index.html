@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beep Careers (@beepcareers) — Fresher & Internship Jobs in India</title>
+  <link rel="icon" type="image/svg+xml" href="/beep-logo.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-active-role="user">
+
+  <div id="login-screen" class="login-page-wrapper">
+    <div class="top-ticker">
+      <div class="ticker-track" id="login-marquee-track"></div>
+    </div>
+
+    <div class="login-main-grid">
+      <div class="login-brand-showcase">
+        <div class="login-logo-row">
+          <img src="/beep-logo-original.jpg" alt="Beep Logo" class="login-logo-circle" onerror="this.src='/beep-logo.svg'" />
+          <div>
+            <div class="brand-handle" style="font-size:1.65rem;">
+              beepcareers
+              <span class="verified-badge">✓</span>
+            </div>
+            <div style="color:#B8B8C7; font-size:0.9rem; font-weight:600;">
+              Career Platform for College Students in India · 15,000+ Placed
+            </div>
+          </div>
+        </div>
+
+        <h1 class="login-hero-title">
+          Find Your First Job.<br />
+          <span class="hl-yellow">Fast, Verified & Spam-Free.</span>
+        </h1>
+
+        <p style="color:#D8D8E6; font-size:0.96rem; max-width:560px;">
+          Sign in as a <strong>Student</strong> to browse and apply to 300+ verified fresher & internship openings across India, as a <strong>Recruiter</strong> to post jobs with automatic AI role and city tagging, or as an <strong>Admin</strong> to manage daily job updates and quality checks.
+        </p>
+
+        <div class="login-mini-cards">
+          <div class="login-mini-card mc-dark">
+            <div style="font-family:var(--font-mono); font-size:0.65rem; color:#FFE01B; font-weight:700;">FOR STUDENTS</div>
+            <div style="font-family:var(--font-display); font-weight:900; font-size:1.05rem; margin:4px 0;">🎓 Student Portal</div>
+            <div style="opacity:0.85;">Browse 300+ verified fresher jobs, filter by role and city, save favorites, and apply directly.</div>
+          </div>
+
+          <div class="login-mini-card mc-yellow">
+            <div style="font-family:var(--font-mono); font-size:0.65rem; font-weight:700;">FOR EMPLOYERS</div>
+            <div style="font-family:var(--font-display); font-weight:900; font-size:1.05rem; margin:4px 0;">💼 Recruiter Studio</div>
+            <div style="opacity:0.9;">Post fresher & internship openings in seconds with automatic AI role and city tagging.</div>
+          </div>
+
+          <div class="login-mini-card mc-white">
+            <div style="font-family:var(--font-mono); font-size:0.65rem; font-weight:700;">FOR PLATFORM TEAM</div>
+            <div style="font-family:var(--font-display); font-weight:900; font-size:1.05rem; margin:4px 0;">🛡️ Admin Dashboard</div>
+            <div style="opacity:0.9;">Sync daily job posts, review removed duplicates, and check AI accuracy & cost metrics.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-card-box">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <h2 style="font-family:var(--font-display); font-weight:900; font-size:1.45rem;">
+            🔐 Sign In to Beep
+          </h2>
+          <img src="/beep-logo.svg" alt="Beep" style="width:36px; height:36px; border-radius:50%;" />
+        </div>
+
+        <div style="font-family:var(--font-mono); font-size:0.7rem; font-weight:700; text-transform:uppercase; color:#555; margin-bottom:6px;">
+          CHOOSE YOUR ACCOUNT TYPE:
+        </div>
+
+        <div class="login-role-tabs">
+          <button type="button" class="login-role-tab active" id="ltab-user" onclick="selectLoginRole('user')">
+            🎓 Student
+          </button>
+          <button type="button" class="login-role-tab" id="ltab-recruiter" onclick="selectLoginRole('recruiter')">
+            💼 Recruiter
+          </button>
+          <button type="button" class="login-role-tab" id="ltab-admin" onclick="selectLoginRole('admin')">
+            🛡️ Admin
+          </button>
+        </div>
+
+        <div class="role-desc-banner" id="login-role-desc">
+          <strong>🎓 Student Account:</strong> Explore 300+ verified fresher & internship jobs across India, filter by role and city, save jobs to your shortlist, and apply directly.
+        </div>
+
+        <form id="main-login-form" onsubmit="submitLoginPage(event)">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="login-page-email" class="form-control" value="student@eventbeep.com" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-page-password" class="form-control" value="student123" required />
+          </div>
+
+          <div id="login-error-msg" class="hidden" style="color:#DC2626; font-weight:800; font-size:0.82rem; margin-bottom:10px;"></div>
+
+          <button type="submit" class="btn-ig-blue" style="width:100%; justify-content:center; padding:13px; font-size:0.95rem;" id="login-submit-btn">
+            🚀 Sign In as Student →
+          </button>
+        </form>
+
+        <div style="margin-top:16px; padding-top:14px; border-top:1.5px solid #E5E4DC; display:flex; justify-content:space-between; align-items:center; font-size:0.78rem;">
+          <span style="color:#555; font-weight:600;">Demo account details are pre-filled for quick sign-in.</span>
+          <button type="button" class="btn-flag-tag" onclick="toggleRegisterMode()" id="toggle-reg-btn">
+            ➕ Create New Account
+          </button>
+        </div>
+
+        <form id="main-register-form" class="hidden" onsubmit="submitRegisterPage(event)" style="margin-top:14px; padding-top:14px; border-top:1.5px dashed #CCC;">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Rohan Deshmukh" required />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" id="reg-email" class="form-control" placeholder="rohan@college.edu" required />
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>I am a *</label>
+            <select id="reg-role" class="form-control">
+              <option value="user">🎓 Student / Job Seeker</option>
+              <option value="recruiter">💼 Recruiter / Employer</option>
+              <option value="admin">🛡️ Platform Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-ig-yellow" style="width:100%; justify-content:center;">
+            ✨ Create Account & Sign In →
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <footer style="text-align:center; padding:16px; font-size:0.76rem; color:#888; border-top:1px solid #222;">
+      Beep Career Platform (@beepcareers) · Baner, Pune · Career Platform for College Students in India
+    </footer>
+  </div>
+
+  <div id="app-shell" class="hidden">
+    <div class="top-ticker" id="role-top-ticker">
+      <div class="ticker-track" id="app-marquee-track"></div>
+    </div>
+
+    <header class="navbar">
+      <div class="navbar-inner">
+        <a class="brand-wrap" onclick="goHomeForRole()">
+          <img src="/beep-logo.svg" alt="Beep Logo" class="brand-logo" />
+          <div class="brand-text-col">
+            <div class="brand-handle">
+              beepcareers
+              <span class="verified-badge" title="Verified Career Platform">✓</span>
+              <span class="portal-mode-pill" id="header-portal-pill">🎓 STUDENT PORTAL</span>
+            </div>
+            <div class="brand-sub" id="header-portal-sub">India's #1 Fresher & College Internship Discovery Platform</div>
+          </div>
+        </a>
+
+        <nav class="nav-tabs role-nav" id="nav-for-user">
+          <button class="nav-tab active" data-tab="explore" onclick="switchTab('explore')">
+            🔥 Explore Jobs <span class="tab-count" id="nav-jobs-count">300</span>
+          </button>
+          <button class="nav-tab" data-tab="student-saved" onclick="switchTab('student-saved')">
+            ⭐ Saved Jobs <span class="tab-count" id="nav-saved-count">3</span>
+          </button>
+          <button class="nav-tab" data-tab="student-activity" onclick="switchTab('student-activity')">
+            📨 My Activity & Feedback <span class="tab-count" id="nav-applied-count">0</span>
+          </button>
+        </nav>
+
+        <nav class="nav-tabs role-nav hidden" id="nav-for-recruiter">
+          <button class="nav-tab" data-tab="recruiter-post" onclick="switchTab('recruiter-post')">
+            ➕ Post a New Job
+          </button>
+          <button class="nav-tab" data-tab="recruiter-applicants" onclick="switchTab('recruiter-applicants')">
+            👥 Student Applicants <span class="tab-count" id="nav-applicants-count">3</span>
+          </button>
+          <button class="nav-tab" data-tab="recruiter-manage" onclick="switchTab('recruiter-manage')">
+            📋 My Posted Jobs <span class="tab-count" id="nav-recruiter-count">3</span>
+          </button>
+          <button class="nav-tab" data-tab="explore" onclick="switchTab('explore')">
+            🔍 Browse All Jobs <span class="tab-count" id="nav-jobs-count-rec">300</span>
+          </button>
+        </nav>
+
+        <nav class="nav-tabs role-nav hidden" id="nav-for-admin">
+          <button class="nav-tab" data-tab="admin-pipeline" onclick="switchTab('admin-pipeline')">
+            ⚡ Job Sync & Duplicates
+          </button>
+          <button class="nav-tab" data-tab="admin-eval" onclick="switchTab('admin-eval')">
+            🎯 Accuracy & Cost Report
+          </button>
+          <button class="nav-tab" data-tab="admin-moderation" onclick="switchTab('admin-moderation')">
+            🛠️ Tag Suggestions <span class="tab-count" id="nav-mod-count">1</span>
+          </button>
+          <button class="nav-tab" data-tab="admin-docs" onclick="switchTab('admin-docs')">
+            📐 How It Works
+          </button>
+          <button class="nav-tab" data-tab="explore" onclick="switchTab('explore')">
+            🔥 All Live Jobs
+          </button>
+        </nav>
+
+        <div class="role-controls">
+          <span class="user-badge-pill" id="logged-in-user-pill">🎓 Mohdaqib (Student)</span>
+          <button class="logout-btn" onclick="logoutToLoginPage()" title="Sign out and return to Login Page">
+            🚪 Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero-section">
+      <div class="hero-inner" id="role-hero-container"></div>
+    </section>
+
+    <main class="main-container">
+      <section id="view-explore">
+        <div class="search-panel">
+          <div class="search-top-row">
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input
+                type="text"
+                id="search-q"
+                class="search-input"
+                placeholder="Search by role, company, skill, or city (e.g. 'Software Engineer', 'Razorpay', 'Pune', 'React', 'Design')..."
+                oninput="onSearchFilterChange()"
+              />
+            </div>
+            <select id="filter-job-type" class="filter-select" onchange="onSearchFilterChange()">
+              <option value="All">All Job Types</option>
+              <option value="Internship">🎓 Internship</option>
+              <option value="Full-Time Fresher">🚀 Full-Time Fresher (0–1 yr)</option>
+            </select>
+            <select id="filter-work-mode" class="filter-select" onchange="onSearchFilterChange()">
+              <option value="All">All Work Modes</option>
+              <option value="On-site">🏢 On-site</option>
+              <option value="Hybrid">⚡ Hybrid</option>
+              <option value="Remote">🏠 Remote</option>
+            </select>
+            <select id="filter-sort" class="filter-select" onchange="onSearchFilterChange()">
+              <option value="newest">Sort: Newest First</option>
+              <option value="popular">Sort: Most Popular</option>
+              <option value="confidence">Sort: Best Match</option>
+            </select>
+          </div>
+
+          <div class="filter-row-label">
+            <span>💼 FILTER BY JOB ROLE</span>
+            <button class="btn-flag-tag" onclick="resetAllFilters()">Reset Filters ✕</button>
+          </div>
+          <div class="chips-scroll" id="role-chips-container"></div>
+
+          <div class="filter-row-label">
+            <span>📍 FILTER BY CITY</span>
+            <span id="active-source-filter-label"></span>
+          </div>
+          <div class="chips-scroll" id="city-chips-container"></div>
+        </div>
+
+        <div class="results-toolbar">
+          <div class="results-count-title" id="results-summary-text">
+            Showing 300 Fresher & Internship Jobs in India
+          </div>
+          <div class="refresh-status-pill">
+            <span class="pulse-dot"></span>
+            <span id="last-refresh-label">Last refreshed recently</span>
+          </div>
+        </div>
+
+        <div class="jobs-grid" id="jobs-grid-container"></div>
+
+        <div id="infinite-scroll-sentinel" class="infinite-scroll-sentinel">
+          ↓ Scroll down to see more jobs automatically ↓
+        </div>
+
+        <div class="pagination-bar" id="pagination-container"></div>
+      </section>
+
+      <div id="live-scroll-toast" class="live-scroll-toast hidden" onclick="injectPendingLiveJobsOnScroll(true)">
+        <span class="pulse-dot"></span>
+        <span id="live-scroll-toast-text">⚡ New job just posted! Scroll down to view</span>
+      </div>
+
+      <section id="view-student-saved" class="hidden">
+        <div class="section-card">
+          <div class="section-title">⭐ My Saved Jobs & Internships</div>
+          <p style="color:#444; margin-bottom:16px;">
+            Signed in as <strong id="student-profile-name">Mohdaqib</strong>. Here are the roles you bookmarked to apply to.
+          </p>
+          <div class="jobs-grid" id="saved-jobs-grid"></div>
+        </div>
+      </section>
+
+      <section id="view-student-activity" class="hidden">
+        <div class="section-card">
+          <div class="section-title">📨 My Activity & Tag Suggestions</div>
+          <p style="color:#444; margin-bottom:18px;">
+            Keep track of the jobs you've saved or applied to, along with any role or city tag edits you suggested.
+          </p>
+          <div class="kpi-grid">
+            <div class="kpi-box kpi-yellow">
+              <div class="kpi-label">SAVED JOBS</div>
+              <div class="kpi-value" id="student-saved-kpi">3</div>
+              <div class="kpi-sub">Bookmarked in your shortlist</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">JOBS APPLIED TO</div>
+              <div class="kpi-value" id="student-applied-kpi">0</div>
+              <div class="kpi-sub">Clicked in this session</div>
+            </div>
+            <div class="kpi-box kpi-dark">
+              <div class="kpi-label">TAG EDITS SUGGESTED</div>
+              <div class="kpi-value" id="student-corrections-kpi">1</div>
+              <div class="kpi-sub">Reviewed by our team</div>
+            </div>
+          </div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">📨 Jobs You Applied To on Beep</h3>
+          <div class="table-wrap" style="margin-bottom:24px;">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>Role & Company</th>
+                  <th>City</th>
+                  <th>Your Submitted Details</th>
+                  <th>Applied On</th>
+                  <th>Recruiter Status</th>
+                </tr>
+              </thead>
+              <tbody id="student-applications-tbody"></tbody>
+            </table>
+          </div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">🛠️ Tag Edits You Suggested</h3>
+          <div class="table-wrap">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>Job & Company</th>
+                  <th>Previous Tag</th>
+                  <th>Suggested Tag</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="student-corrections-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-recruiter-post" class="hidden">
+        <div class="section-card">
+          <div class="section-title">➕ Post a Fresher Job or Internship</div>
+          <p style="color:#444; margin-bottom:18px;">
+            Fill in your job details below. Our AI automatically detects the right <strong>Role Category</strong> and <strong>City</strong> so students across India can find your opening easily.
+          </p>
+
+          <form id="recruiter-post-form" onsubmit="submitRecruiterJob(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Job or Internship Title *</label>
+                <input type="text" id="rec-title" class="form-control" placeholder="e.g. Gen AI & Full-Stack Intern" value="Gen AI & Full-Stack Intern (2026 Batch)" required />
+              </div>
+              <div class="form-group">
+                <label>Company Name *</label>
+                <input type="text" id="rec-company" class="form-control" placeholder="e.g. Beep Careers" value="Beep Careers" required />
+              </div>
+              <div class="form-group">
+                <label>Location (Area or City, e.g. Baner, Pune or Bengaluru) *</label>
+                <input type="text" id="rec-location" class="form-control" placeholder="e.g. Baner, Pune (Hybrid)" value="Baner, Pune (Hybrid)" required />
+              </div>
+              <div class="form-group">
+                <label>Monthly Stipend or Annual CTC</label>
+                <input type="text" id="rec-stipend" class="form-control" placeholder="e.g. ₹35,000 / month or ₹10 LPA" value="₹35,000 - ₹50,000 / month" />
+              </div>
+              <div class="form-group">
+                <label>Job Type</label>
+                <select id="rec-type" class="form-control">
+                  <option value="Internship">Internship</option>
+                  <option value="Full-Time Fresher">Full-Time Fresher (0–1 yr)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Key Skills (Comma separated)</label>
+                <input type="text" id="rec-skills" class="form-control" placeholder="Python, TypeScript, React, SQL" value="Python, TypeScript, Gemini AI, PostgreSQL" />
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>External Application Website (Optional — Leave blank if you don't have a company website; students will apply directly on Beep and you will see all their contact details in 'Student Applicants')</label>
+                <input type="url" id="rec-url" class="form-control" placeholder="Leave blank to collect student applications & contact details directly on Beep" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Job Description & Responsibilities *</label>
+              <textarea id="rec-desc" rows="3" class="form-control" placeholder="Describe what the fresher or intern will work on..." required>Build AI-powered career tools, data pipelines, and web applications for college students at our Baner, Pune office.</textarea>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+              <button type="button" class="btn-ig-yellow" onclick="previewLlmTagging()">
+                ✨ Preview AI Role & City Tags
+              </button>
+              <button type="submit" class="btn-ig-blue">
+                🚀 Publish Job Now
+              </button>
+            </div>
+          </form>
+
+          <div id="rec-llm-preview-box" class="hidden" style="margin-top:18px; padding:16px; background:#FFFBE6; border:2.5px solid #171722; border-radius:12px;"></div>
+        </div>
+      </section>
+
+      <section id="view-recruiter-manage" class="hidden">
+        <div class="section-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+            <div>
+              <div class="section-title">📋 My Posted Jobs & Student Reach</div>
+              <p style="color:#444;">
+                See how many students have viewed and applied to your active job listings.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-ig-blue" onclick="switchTab('recruiter-applicants')">
+                👥 View Student Applicants
+              </button>
+              <button class="btn-ig-yellow" onclick="switchTab('recruiter-post')">
+                ➕ Post Another Job
+              </button>
+            </div>
+          </div>
+
+          <div class="kpi-grid" id="recruiter-kpi-grid"></div>
+
+          <div class="jobs-grid" id="recruiter-jobs-grid"></div>
+        </div>
+      </section>
+
+      <section id="view-recruiter-applicants" class="hidden">
+        <div class="section-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+            <div>
+              <div class="section-title">👥 Student Applicants & Contact Directory</div>
+              <p style="color:#444;">
+                No company career page needed — view every student who applied to your jobs with their full profile, college, resume link, email, and phone/WhatsApp number right here.
+              </p>
+            </div>
+            <button class="btn-ig-yellow" onclick="filterRecruiterApplicants(0)" id="rec-show-all-apps-btn">
+              Show All Applicants
+            </button>
+          </div>
+
+          <div class="kpi-grid" id="recruiter-app-kpi-grid"></div>
+
+          <div class="jobs-grid" id="recruiter-applicants-grid"></div>
+        </div>
+      </section>
+
+      <section id="view-admin-pipeline" class="hidden">
+        <div class="section-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+            <div>
+              <div class="section-title">⚡ Daily Job Sync & Duplicate Removal</div>
+              <p style="color:#444;">
+                View daily job collection runs, automatic duplicate removal across sources, and AI tagging status.
+              </p>
+            </div>
+            <button class="btn-ig-blue" onclick="triggerManualPipeline()" id="admin-run-btn">
+              🔄 Sync Latest Jobs Now
+            </button>
+          </div>
+
+          <div class="kpi-grid" id="admin-kpi-grid"></div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin:18px 0 10px;">🕒 Recent Job Sync History</h3>
+          <div class="table-wrap" style="margin-bottom:24px;">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>Run #</th>
+                  <th>Started By</th>
+                  <th>Total Scanned</th>
+                  <th>Unique Live Jobs</th>
+                  <th>Duplicates Removed</th>
+                  <th>AI Cost / 1,000 Jobs</th>
+                  <th>Time Taken</th>
+                  <th>Completed</th>
+                </tr>
+              </thead>
+              <tbody id="admin-runs-tbody"></tbody>
+            </table>
+          </div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin:18px 0 10px;">🧹 Duplicate Posts Automatically Removed</h3>
+          <div class="table-wrap">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Duplicate Job Removed</th>
+                  <th>Found On</th>
+                  <th>How It Was Detected</th>
+                  <th>Match Score</th>
+                  <th>Kept Original Job</th>
+                </tr>
+              </thead>
+              <tbody id="admin-dupes-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-admin-eval" class="hidden">
+        <div class="section-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
+            <div>
+              <div class="section-title">🎯 50-Job Hand-Checked Accuracy & Cost Report</div>
+              <p style="color:#444;">
+                We manually verified 50 job posts across roles and cities to measure our AI tagging accuracy and cost per 1,000 posts. You can also update any row below to recalculate accuracy live.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a href="/api/export/eval-50.csv" class="btn-ig-yellow" style="text-decoration:none;">
+                📥 Download 50-Job Audit Sheet (CSV)
+              </a>
+              <a href="/api/export/all-jobs.csv" class="btn-ig-blue" style="text-decoration:none;">
+                📥 Download All 300+ Jobs (CSV)
+              </a>
+            </div>
+          </div>
+
+          <div class="kpi-grid" id="eval-kpi-grid"></div>
+
+          <div style="background:#12121A; color:#fff; border-radius:14px; padding:20px; margin-bottom:22px; border:2.5px solid var(--beep-yellow);">
+            <h3 style="font-family:var(--font-display); color:var(--beep-yellow); margin-bottom:8px;">
+              💰 How Much Does AI Tagging Cost Per 1,000 Job Posts?
+            </h3>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; font-size:0.85rem;">
+              <div>
+                <strong style="color:#FFE01B;">1. Smart Batching (10 Jobs Per Call):</strong><br />
+                • Grouping 10 jobs into one request shares the instructions across all 10 jobs.<br />
+                • Average Input: <strong>165,000 tokens / 1,000 jobs</strong><br />
+                • Average Output: <strong>42,000 tokens / 1,000 jobs</strong>
+              </div>
+              <div>
+                <strong style="color:#FFE01B;">2. Cost Per 1,000 Jobs (Gemini 3.5 Flash-Lite):</strong><br />
+                • Input tokens cost: <strong>$0.0165</strong><br />
+                • Output tokens cost: <strong>$0.0168</strong><br />
+                • <strong>Total = $0.0333 USD (₹2.81 INR) per 1,000 jobs</strong>
+              </div>
+              <div>
+                <strong style="color:#FFE01B;">3. Actual Out-of-Pocket Spend (₹0.00):</strong><br />
+                • Runs within the Google AI Studio Free Tier.<br />
+                • Already-tagged jobs are saved so daily refreshes only tag newly discovered jobs, saving <strong>86.1%</strong> in token usage.
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+            <h3 style="font-family:var(--font-display); font-weight:800;">🔬 50 Hand-Checked Jobs (AI Tag vs Human Review)</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="filter-chip active" id="eval-filter-all" onclick="setEvalFilter('all')">Show All 50 Jobs</button>
+              <button class="filter-chip" id="eval-filter-err" onclick="setEvalFilter('errors')">Show 4 Differences Only</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Company & Job Title</th>
+                  <th>Listed Location & Source</th>
+                  <th>AI Role Tag</th>
+                  <th>Verified Role</th>
+                  <th>AI City Tag</th>
+                  <th>Verified City</th>
+                  <th>Result</th>
+                  <th>Review Notes</th>
+                </tr>
+              </thead>
+              <tbody id="eval-50-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-admin-moderation" class="hidden">
+        <div class="section-card">
+          <div class="section-title">🛠️ Student Tag Suggestions</div>
+          <p style="color:#444; margin-bottom:18px;">
+            Review role or city edits suggested by students. Approving a suggestion immediately updates the job card on the live board.
+          </p>
+
+          <div class="table-wrap">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Job & Company</th>
+                  <th>Current Tag</th>
+                  <th>Suggested Tag</th>
+                  <th>Why Suggested</th>
+                  <th>Suggested By</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-corrections-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-admin-docs" class="hidden">
+        <div class="section-card">
+          <div class="section-title">📐 How It Works, What Broke & How We Fixed It</div>
+          <p style="color:#444; margin-bottom:18px;">
+            A clear walkthrough of the system architecture, the real challenges we solved while building it, and the AI prompt powering our role and city tagging.
+          </p>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">1. System Architecture Overview</h3>
+          <div class="code-block" style="margin-bottom:22px;">
+[Step 1: Collect From Public Job Boards]
+   20 Official Company Greenhouse Boards (Razorpay, Groww, Druva, PubMatic, Zscaler, MongoDB, Rubrik, etc.)
+   + Remotive API + Jobicy API + HackerNews Jobs API + Direct Recruiter Posts
+        │
+        ▼
+[Step 2: Filter & Remove Duplicates (3-Step Check)]
+   ├─► Check 1: Clean URL Match (removes tracking links pointing to the same job)
+   ├─► Check 2: Company + Title + City Match (catches the same role reposted across boards)
+   └─► Check 3: Similar Title Match (catches slight title variations at the same company)
+        │
+        ▼
+[Step 3: AI Role & City Tagging (Python + Google Gemini 3.5 Flash-Lite)]
+   ├─► Groups 10 jobs per request to keep costs at just ₹2.81 ($0.0333) per 1,000 jobs
+   ├─► Assigns 1 of 14 Standard Job Roles & 1 of 14 Indian Cities
+   └─► Maps local areas (like Baner, Hinjewadi, Koramangala, Gurugram) to their main city
+        │
+        ▼
+[Step 4: Daily Auto-Refresh & Live Streaming]
+   └─► Refreshes automatically every morning at 6:00 AM IST & streams new Recruiter jobs live on scroll</div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">2. What Broke & How We Fixed It</h3>
+          <div class="table-wrap" style="margin-bottom:22px;">
+            <table class="beep-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>What Broke</th>
+                  <th>Why It Happened</th>
+                  <th>How We Fixed It</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1</strong></td>
+                  <td><strong>Same job appeared multiple times from different feeds</strong></td>
+                  <td>Aggregator feeds reposted the exact same company job with tracking links or extra words like <code>[Hiring Urgent]</code> and <code>India Pvt. Ltd.</code></td>
+                  <td>Built a <strong>3-step duplicate filter</strong> that cleans URLs, strips company suffixes, and compares title similarity — catching and removing <strong>95 duplicate posts</strong>.</td>
+                </tr>
+                <tr>
+                  <td><strong>2</strong></td>
+                  <td><strong>Neighborhood names broke city filtering</strong></td>
+                  <td>Many posts listed areas like <code>"Baner"</code>, <code>"Hinjewadi"</code>, <code>"Balewadi High Street"</code>, or <code>"Koramangala"</code> instead of <code>"Pune"</code> or <code>"Bengaluru"</code>.</td>
+                  <td>Added Indian neighborhood mapping rules in both our city normalizer and AI prompt so local areas map cleanly to their parent city (achieving <strong>96% City Accuracy</strong>).</td>
+                </tr>
+                <tr>
+                  <td><strong>3</strong></td>
+                  <td><strong>Older Gemini model version was retired for new keys</strong></td>
+                  <td>Calling <code>gemini-2.5-flash-lite</code> with a new AI Studio key returned a <code>404 Not Found</code> error asking to upgrade to <code>gemini-3.5-flash-lite</code>.</td>
+                  <td>Upgraded our Python AI worker to <strong>Gemini 3.5 Flash-Lite</strong> and batched 10 jobs per call, cutting cost by <strong>86.1%</strong> down to <strong>₹2.81 ($0.0333) per 1,000 jobs</strong>.</td>
+                </tr>
+                <tr>
+                  <td><strong>4</strong></td>
+                  <td><strong>Vague startup job titles ("Founder's Office Intern")</strong></td>
+                  <td>During our 50-job hand check, a few posts had general titles while the description asked for Product Management (PRDs/wireframes) or AI/ML skills.</td>
+                  <td>Updated our AI prompt to weigh the job description alongside the title, and added a <strong>Suggest Tag Edit</strong> button so students and admins can refine any tag.</td>
+                </tr>
+                <tr>
+                  <td><strong>5</strong></td>
+                  <td><strong>Showing new Recruiter posts without refreshing the student's page</strong></td>
+                  <td>Auto-reloading the page while a student is scrolling jumps them back to the top and ruins their search experience.</td>
+                  <td>Added a live background stream so when a Recruiter publishes a job, it waits quietly and <strong>slides smoothly into the student's feed as they scroll down</strong>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">3. AI Prompt Used for Role & City Tagging</h3>
+          <pre class="code-block">You are Beep's Senior Career Taxonomy AI.
+Given a batch of Indian fresher / college internship job postings, classify each job into:
+1. role_tag: Choose from our 14 standard roles (Software Engineering, Frontend & Web Dev,
+   Backend & Cloud/DevOps, Data Science & AI/ML, Mobile Development, Product Design (UI/UX),
+   Product Management, Marketing & Growth, Business Development & Sales, Operations & Strategy,
+   Content & Social Media, Finance & Analyst, HR & Talent, QA & Testing).
+2. city: Normalize into 1 of 14 Indian locations (Bengaluru, Pune, Mumbai, Hyderabad, Delhi NCR,
+   Chennai, Kolkata, Ahmedabad, Jaipur, Kochi, Indore, Chandigarh, Remote (India), Pan-India / Multiple).
+   - Map Baner / Hinjewadi / Kharadi / Viman Nagar / Balewadi -> Pune
+   - Map Bangalore / Koramangala / HSR / Whitefield -> Bengaluru
+   - Map Gurgaon / Gurugram / Noida / New Delhi -> Delhi NCR
+3. confidence: Match confidence score between 0.75 and 0.99.
+4. reasoning: One clear sentence explaining why this role and city were chosen.</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="report-modal">
+    <div class="modal-box">
+      <h3 style="font-family:var(--font-display); font-weight:900; margin-bottom:6px;">🛠️ Suggest a Better Role or City Tag</h3>
+      <p style="font-size:0.82rem; color:#444; margin-bottom:14px;" id="report-modal-job-label"></p>
+      <form onsubmit="submitTagCorrection(event)">
+        <input type="hidden" id="report-job-id" />
+        <div class="form-group">
+          <label>Suggested Role</label>
+          <select id="report-role-select" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Suggested City</label>
+          <select id="report-city-select" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Short Note</label>
+          <input type="text" id="report-reason" class="form-control" placeholder="e.g. This role focuses on UI/UX design in Figma" required />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+          <button type="button" class="btn-flag-tag" onclick="closeReportModal()">Cancel</button>
+          <button type="submit" class="btn-ig-blue">Save Suggestion</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="apply-modal">
+    <div class="modal-box" style="max-width:560px;">
+      <h3 style="font-family:var(--font-display); font-weight:900; margin-bottom:4px;">⚡ Apply Directly on Beep</h3>
+      <p style="font-size:0.84rem; color:#444; margin-bottom:14px;" id="apply-modal-job-label"></p>
+      <form onsubmit="submitDirectApplication(event)">
+        <input type="hidden" id="apply-job-id" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Your Full Name *</label>
+            <input type="text" id="apply-name" class="form-control" value="Mohdaqib Chauhan" required />
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="apply-email" class="form-control" value="student@eventbeep.com" required />
+          </div>
+          <div class="form-group">
+            <label>Phone / WhatsApp Number *</label>
+            <input type="text" id="apply-phone" class="form-control" value="+91 98230 45120" required />
+          </div>
+          <div class="form-group">
+            <label>Graduation Year *</label>
+            <input type="text" id="apply-grad-year" class="form-control" value="2026" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>College / University *</label>
+          <input type="text" id="apply-college" class="form-control" value="Pune Institute of Computer Technology (PICT)" required />
+        </div>
+        <div class="form-group">
+          <label>Resume, Portfolio, or GitHub Link *</label>
+          <input type="url" id="apply-resume" class="form-control" value="https://github.com/mohdaqib" required />
+        </div>
+        <div class="form-group">
+          <label>Your Key Skills</label>
+          <input type="text" id="apply-skills" class="form-control" value="TypeScript, Node.js, Python, Gemini AI, PostgreSQL" />
+        </div>
+        <div class="form-group">
+          <label>Short Note to the Recruiter *</label>
+          <textarea id="apply-note" rows="2" class="form-control" required>Hi! I have strong hands-on experience with these skills and would love to contribute to your team.</textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+          <button type="button" class="btn-flag-tag" onclick="closeApplyModal()">Cancel</button>
+          <button type="submit" class="btn-ig-blue">🚀 Send My Application to Recruiter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

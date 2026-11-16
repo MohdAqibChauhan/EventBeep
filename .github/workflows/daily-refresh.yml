@@ -1,0 +1,52 @@
+name: Daily India Fresher Jobs Refresh & Python LLM Tagger
+
+on:
+  schedule:
+    - cron: '30 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  collect-dedupe-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Run Node.js Collectors & 3-Layer Deduplication
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run collect
+
+      - name: Run Python Gemini LLM Tagger & Cost Logger
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.5-flash-lite
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python tagger/tag_jobs.py
+
+      - name: Run 50-Post Accuracy & Cost Benchmark
+        run: python tagger/evaluate.py
+
+      - name: Commit updated store & CSV sheets if changed
+        run: |
+          git config user.name "beep-daily-cron-bot"
+          git config user.email "bot@eventbeep.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "chore(cron): daily refresh of 200+ India fresher jobs & LLM tags"
+          git push
