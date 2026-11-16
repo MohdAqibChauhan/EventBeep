@@ -711,6 +711,15 @@ function handleClientFallbackApi(method, url, bodyObj = {}) {
     const cleanTitle = String(bodyObj.title || '').trim();
     const cleanCompany = String(bodyObj.company || '').trim();
     const cleanLoc = String(bodyObj.location_raw || '').trim();
+    if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(cleanTitle)) {
+      return {
+        ok: false,
+        status: 400,
+        data: {
+          error: 'Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.'
+        }
+      };
+    }
     const tag = clientClassifyJob(cleanTitle, cleanLoc, bodyObj.description);
     const normKey = `${cleanCompany.toLowerCase().replace(/[^a-z0-9]/g, '')}|${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}|${tag.city.toLowerCase()}`;
 
@@ -2186,6 +2195,10 @@ async function submitRecruiterJob(e) {
 
   if (!payload.title || payload.title.length < 3) {
     box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Please enter a clear Job Title (at least 3 characters) before publishing.</div>`;
+    return;
+  }
+  if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(payload.title)) {
+    box.innerHTML = `<div style="color:#991B1B; font-weight:800;">⚠️ Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.</div>`;
     return;
   }
   if (!payload.company || payload.company.length < 2) {

@@ -61,17 +61,30 @@ function inferSkillsFromTitle(title: string): string[] {
   return ['Software Engineering', 'Python', 'TypeScript', 'SQL', 'Git'];
 }
 
-function adaptGreenhouseTitleForFresherFeed(rawTitle: string): {
+export function adaptGreenhouseTitleForFresherFeed(rawTitle: string): {
   title: string;
   job_type: 'Internship' | 'Full-Time Fresher';
   exp: string;
 } {
-  const clean = rawTitle.replace(/\b(senior|sr\.?|staff|principal|lead|manager|director|vp|head of)\s+/gi, '').trim();
-  if (/\b(intern|internship|trainee|apprentice|co-op)\b/i.test(rawTitle)) {
-    return { title: rawTitle, job_type: 'Internship', exp: '0 yrs (2025/2026 Batch)' };
+  let clean = rawTitle
+    .replace(/\b(senior|sr\.?|staff|principal|director|vp|vice president|head of|chief)\b[\s,-]*/gi, '')
+    .replace(/\b(engineering|cluster|group|regional|country)\s+manager\b/gi, '$1 Associate')
+    .replace(/\bmanager\b/gi, 'Associate')
+    .replace(/\blead\b/gi, 'Associate')
+    .replace(/\b(ii|iii|iv|2|3|4)\b/gi, 'I')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,-]+|[\s,-]+$/g, '')
+    .trim();
+
+  if (!clean || clean.length < 3) {
+    clean = 'Software Engineer';
   }
-  if (/\b(associate|junior|jr\.?|entry|fresher|new grad|graduate|1\b|i\b|sde-?1|swe-?1|analyst)\b/i.test(rawTitle)) {
-    return { title: rawTitle, job_type: 'Full-Time Fresher', exp: '0 - 1 year' };
+
+  if (/\b(intern|internship|trainee|apprentice|co-op)\b/i.test(clean)) {
+    return { title: clean, job_type: 'Internship', exp: '0 yrs (2025/2026 Batch)' };
+  }
+  if (/\b(associate|junior|jr\.?|entry|fresher|new grad|graduate|1\b|i\b|sde-?1|swe-?1|analyst)\b/i.test(clean)) {
+    return { title: clean, job_type: 'Full-Time Fresher', exp: '0 - 1 year' };
   }
   const isInternTrack = clean.length % 2 === 0;
   return {
@@ -158,8 +171,9 @@ async function fetchLiveRemotiveJobicyAndHn(): Promise<RawCollectedJob[]> {
   for (const j of (Array.isArray(remotiveData?.jobs) ? remotiveData.jobs : []).slice(0, 16)) {
     const loc = String(j.candidate_required_location || 'Remote');
     if (/worldwide|anywhere|india|asia|global/i.test(loc)) {
+      const adapted = adaptGreenhouseTitleForFresherFeed(String(j.title || 'Software Engineer'));
       results.push({
-        title: `${j.title} (Remote - India Eligible)`,
+        title: `${adapted.title} (Remote - India Eligible)`,
         company: j.company_name || 'Remote Startup',
         location_raw: loc.includes('India') ? loc : 'Remote (India)',
         description: String(j.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 450),
@@ -177,8 +191,9 @@ async function fetchLiveRemotiveJobicyAndHn(): Promise<RawCollectedJob[]> {
 
   const jobicyData = await fetchJsonWithTimeout('https://jobicy.com/api/v2/remote-jobs?count=20', headers, 5000);
   for (const j of (Array.isArray(jobicyData?.jobs) ? jobicyData.jobs : []).slice(0, 12)) {
+    const adapted = adaptGreenhouseTitleForFresherFeed(String(j.jobTitle || 'Software Engineer'));
     results.push({
-      title: `${j.jobTitle} (Fresher / Junior Track)`,
+      title: adapted.title,
       company: j.companyName || 'Global Remote Tech',
       location_raw: j.jobGeo ? `${j.jobGeo} / Remote (India)` : 'Remote (India)',
       description: String(j.jobExcerpt || j.jobDescription || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 420),

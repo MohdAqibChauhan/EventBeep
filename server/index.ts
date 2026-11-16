@@ -720,6 +720,11 @@ app.post('/api/recruiter/jobs', async (req, res) => {
   if (!cleanTitle || cleanTitle.length < 3) {
     return res.status(400).json({ error: 'Please enter a valid Job Title (at least 3 characters).' });
   }
+  if (/\b(senior|sr\.?|principal|staff|director|vp|vice president|head of|chief)\b/i.test(cleanTitle)) {
+    return res.status(400).json({
+      error: 'Beep is exclusively for Fresher (0–1 yr) and College Internship roles. Senior, Principal, Staff, Director, and VP roles are not allowed.'
+    });
+  }
   if (!cleanCompany || cleanCompany.length < 2) {
     return res.status(400).json({ error: 'Please enter your Company or Startup name.' });
   }
