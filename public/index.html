@@ -648,10 +648,22 @@
 
       <section id="view-admin-docs" class="hidden">
         <div class="section-card">
-          <div class="section-title">📐 How It Works, What Broke & How We Fixed It</div>
-          <p style="color:#444; margin-bottom:18px;">
-            A clear walkthrough of the system architecture, the real challenges we solved while building it, and the AI prompt powering our role and city tagging.
-          </p>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
+            <div>
+              <div class="section-title">📐 How It Works, What Broke & How We Fixed It</div>
+              <p style="color:#444;">
+                A clear walkthrough of the system architecture, the real challenges we solved while building it, and the AI prompt powering our role and city tagging.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a href="/EventBeep_Working_Doc.doc" download="EventBeep_Working_Doc.doc" class="btn-ig-yellow" style="text-decoration:none;">
+                📥 Download Working Doc (.doc)
+              </a>
+              <a href="/EventBeep_Working_Doc.pdf" download="EventBeep_Working_Doc.pdf" class="btn-ig-blue" style="text-decoration:none;">
+                📥 Download Working Doc (.pdf)
+              </a>
+            </div>
+          </div>
 
           <h3 style="font-family:var(--font-display); font-weight:800; margin-bottom:10px;">1. System Architecture Overview</h3>
           <div class="code-block" style="margin-bottom:22px;">
@@ -666,10 +678,10 @@
    └─► Check 3: Similar Title Match (catches slight title variations at the same company)
         │
         ▼
-[Step 3: AI Role & City Tagging (Python + Google Gemini 3.5 Flash-Lite)]
+[Step 3: AI Role & City Tagging (Python + Google Gemini 3.1 Flash-Lite)]
    ├─► Groups 10 jobs per request for fast, reliable batch tagging
-   ├─► Assigns 1 of 14 Standard Job Roles & 1 of 14 Indian Cities
-   └─► Maps local areas (like Baner, Hinjewadi, Koramangala, Gurugram) to their main city
+   ├─► Assigns 1 of 14 Standard Job Roles & 1 of 15 Locations (14 Indian Cities + International / Global)
+   └─► Maps local areas (like Baner, Hinjewadi, Borivali, Andheri, Koramangala, Gurugram) to their main city
         │
         ▼
 [Step 4: Daily Auto-Refresh & Live Streaming]
