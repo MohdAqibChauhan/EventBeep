@@ -1426,6 +1426,15 @@ function selectLoginRole(role, preserveInputs = false) {
   }
 }
 
+function fillDemoCredentials(role, email, password) {
+  selectLoginRole(role, true);
+  const emailInput = document.getElementById('login-page-email');
+  const passInput = document.getElementById('login-page-password');
+  if (emailInput) emailInput.value = email;
+  if (passInput) passInput.value = password;
+  showFeedbackToast(`✅ Filled ${email} — click Sign In!`);
+}
+
 function onChangeRegisterRole() {
   const regRoleEl = document.getElementById('reg-role');
   const labelEl = document.getElementById('reg-org-label');
