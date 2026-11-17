@@ -6,7 +6,7 @@
 | **5-Minute Walkthrough Video (Loom)** | **https://www.loom.com/share/b84c8bb5b45244d5afb19656edb9b4bf** |
 | **Live Deployed Web Application** | **https://eventbeep.vercel.app** |
 | **Interactive Online Working Doc** | **https://eventbeep.vercel.app/working-doc.html** |
-| **Downloadable Working Doc (PDF / Word)** | [EventBeep_Working_Doc.pdf](https://eventbeep.vercel.app/EventBeep_Working_Doc.pdf) · [EventBeep_Working_Doc.doc](https://eventbeep.vercel.app/EventBeep_Working_Doc.doc) |
+| **Downloadable Working Doc (PDF / Word)** | [EventBeep_Working_Doc.pdf](https://eventbeep.vercel.app/EventBeep_Working_Doc.pdf) · [EventBeep_Working_Doc.docx](https://eventbeep.vercel.app/EventBeep_Working_Doc.docx) |
 | **Public GitHub Repository** | **https://github.com/MohdAqibChauhan/EventBeep** |
 | **Raw & Tagged Jobs Dataset (300 Jobs CSV)** | [all_200_plus_jobs.csv](https://eventbeep.vercel.app/all_200_plus_jobs.csv) |
 | **50-Job Hand-Checked Accuracy Audit CSV** | [hand_checked_50_posts.csv](https://eventbeep.vercel.app/hand_checked_50_posts.csv) |
