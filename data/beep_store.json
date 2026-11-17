@@ -61,7 +61,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 4,
+      "views_count": 6,
       "apply_clicks": 0
     },
     {
@@ -96,7 +96,7 @@
       "tagged_by": "gemini-llm",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 3,
+      "views_count": 5,
       "apply_clicks": 0
     },
     {
@@ -132,7 +132,7 @@
       "is_fresher": true,
       "posted_by": 2,
       "has_external_url": false,
-      "views_count": 3,
+      "views_count": 5,
       "apply_clicks": 0
     },
     {
@@ -168,8 +168,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 49,
-      "apply_clicks": 25
+      "views_count": 52,
+      "apply_clicks": 26
     },
     {
       "id": 2,
@@ -203,8 +203,8 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 56,
-      "apply_clicks": 28
+      "views_count": 59,
+      "apply_clicks": 29
     },
     {
       "id": 3,
@@ -238,7 +238,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": 2,
-      "views_count": 48,
+      "views_count": 50,
       "apply_clicks": 16
     },
     {
@@ -417,7 +417,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 83,
+      "views_count": 85,
       "apply_clicks": 31
     },
     {
@@ -1276,7 +1276,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 111,
+      "views_count": 113,
       "apply_clicks": 19
     },
     {
@@ -1707,7 +1707,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 55,
+      "views_count": 57,
       "apply_clicks": 13
     },
     {
@@ -2812,7 +2812,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 132,
+      "views_count": 134,
       "apply_clicks": 22
     },
     {
@@ -3276,7 +3276,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 83,
+      "views_count": 85,
       "apply_clicks": 19
     },
     {
@@ -3706,7 +3706,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 27,
+      "views_count": 29,
       "apply_clicks": 13
     },
     {
@@ -4674,7 +4674,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 76,
+      "views_count": 78,
       "apply_clicks": 10
     },
     {
@@ -5821,7 +5821,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 20,
+      "views_count": 22,
       "apply_clicks": 22
     },
     {
@@ -5928,7 +5928,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 41,
+      "views_count": 43,
       "apply_clicks": 31
     },
     {
@@ -5964,7 +5964,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 48,
+      "views_count": 50,
       "apply_clicks": 34
     },
     {
@@ -6000,7 +6000,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 55,
+      "views_count": 57,
       "apply_clicks": 37
     },
     {
@@ -6036,7 +6036,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 62,
+      "views_count": 64,
       "apply_clicks": 40
     },
     {
@@ -6428,7 +6428,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 139,
+      "views_count": 141,
       "apply_clicks": 31
     },
     {
@@ -7893,7 +7893,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 146,
+      "views_count": 148,
       "apply_clicks": 28
     },
     {
@@ -7929,7 +7929,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 153,
+      "views_count": 155,
       "apply_clicks": 31
     },
     {
@@ -10279,7 +10279,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 55,
+      "views_count": 57,
       "apply_clicks": 19
     },
     {
@@ -10314,7 +10314,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 62,
+      "views_count": 64,
       "apply_clicks": 22
     },
     {
@@ -10350,7 +10350,7 @@
       "tagged_by": "hybrid-llm-rules",
       "is_fresher": true,
       "posted_by": null,
-      "views_count": 69,
+      "views_count": 71,
       "apply_clicks": 25
     },
     {

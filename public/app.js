@@ -2551,8 +2551,8 @@ async function loadAdminOverview() {
       ) +
       renderKpiBox(
         'COST PER 1,000 JOBS',
-        `₹${latestRun.cost_per_1000_inr || 8.94} <span style="font-size:0.95rem; font-weight:700;">($${latestRun.cost_per_1000_usd || 0.095})</span>`,
-        `₹${(((latestRun.tagged || data.tagged_jobs || 300) * 8.94) / 1000).toFixed(2)} for ${latestRun.tagged || data.tagged_jobs || 300} jobs · ₹4.47 via Batch API · ₹0 Free Tier`
+        `₹8.94 <span style="font-size:0.95rem; font-weight:700;">($0.095)</span>`,
+        `₹${(((latestRun.tagged || data.tagged_jobs || 300) * 8.94) / 1000).toFixed(2)} for ${latestRun.tagged || data.tagged_jobs || 300} jobs · ₹4.47 Batch API · ₹0 Free Tier`
       );
   }
 

@@ -138,3 +138,22 @@ Classify this Indian fresher/internship job into role_tag (<14 canonical roles>)
 2. **Gemini Model `404` & Token Bloat (`₹24.81` -> `₹8.94` / `₹4.47`)**: Upgraded from retired `2.5-flash-lite` to `gemini-3.1-flash-lite` with compact 10-job JSON batches (`98` in / `47` out tokens/job measured live).
 3. **Vercel Serverless `NOT_FOUND` & Read-Only FS**: Resolved via `vercel.json` `/api/(.*)` rewrites, static JSON imports (`server/db.ts`, `server/taxonomy.ts`), `/tmp` runtime writes, and bundled `public/seed-data.js` fallback.
 4. **Zero-Refresh Live Job Streaming + Senior Role & Negative Validation**: Added SSE + cross-tab scroll-triggered card injection for Students, blocked Senior/Principal/Director titles pre-AI and on recruiter submit, and verified **13/13** automated test cases.
+
+---
+
+## 9. Live Application Screenshots
+
+### 1. Role-Isolated Login Portal with 1-Click Demo Access
+![Login Portal](public/screenshots/01-login-portal.png)
+
+### 2. Student Portal (300+ Verified Jobs & Role/City Filters)
+![Student Portal](public/screenshots/02-student-feed.png)
+
+### 3. Recruiter Studio (`Andheri` -> `Mumbai` + 1-Click Apply Suggested Tags)
+![Recruiter Studio AI Tags](public/screenshots/03-recruiter-ai-tags.png)
+
+### 4. Admin Dashboard (300 Unique Jobs, 93 Duplicates Removed, ₹8.94 / 1k Rate & Sync History)
+![Admin Dashboard Sync](public/screenshots/04-admin-sync-cost.png)
+
+### 5. 50-Job Hand-Checked Accuracy Audit (94% Role / 96% City / ₹8.94)
+![50-Job Evaluation Report](public/screenshots/05-eval-50-report.png)

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EventBeep (@beepcareers) — Gen AI &amp; Engineering Working Doc</title>
 <style>
-  @page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+  @page { size: A4; margin: 13mm; }
   * { box-sizing: border-box; }
   body {
     font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
@@ -164,6 +164,27 @@
   .muted { color: #64748B; font-size: 11.5px; }
   ol, ul { margin: 8px 0 14px 20px; padding: 0; }
   li { margin-bottom: 7px; }
+  .shot-card {
+    border: 2px solid #171722;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 14px 0 18px 0;
+    page-break-inside: avoid;
+    background: #FFFFFF;
+  }
+  .shot-caption {
+    background: #171722;
+    color: #FFE01B;
+    padding: 8px 12px;
+    font-family: Consolas, monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .shot-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
   .footer-note {
     margin-top: 26px;
     padding-top: 12px;
@@ -178,7 +199,7 @@
   <div class="doc-header">
     <div class="doc-kicker">Beep Gen AI &amp; Engineering Submission &bull; Working Document</div>
     <h1>EventBeep (@beepcareers) &mdash; AI-Tagged India Fresher &amp; Internship Job Radar</h1>
-    <p class="doc-subtitle">Complete Research Findings, Raw Datasets, AI Tooling, Production Prompts, 50-Job Accuracy Audit &amp; Live Proof</p>
+    <p class="doc-subtitle">Complete Research Findings, Raw Datasets, AI Tooling, Production Prompts, 50-Job Accuracy Audit &amp; Visual Proof</p>
   </div>
 
   <div class="links-card">
@@ -307,13 +328,40 @@ Given a batch of Indian fresher / college internship job postings, classify each
     <tr><td><b>#11</b></td><td><b>Razorpay</b><br><span class="muted">Security Engineer (Associate / Fresher Track)</span></td><td>Bengaluru</td><td>Software Engineering<br><span class="muted">Bengaluru</span></td><td><b>Product Management</b><br><span class="muted">Bengaluru</span></td><td>Ambiguous hybrid title with PRD/roadmap duties: LLM tagged "Operations &amp; Strategy", human reviewer labeled "Product Management". Fixed by adding APM/PRD weighting in prompt v2.</td></tr><tr><td><b>#23</b></td><td><b>Groww</b><br><span class="muted">Associate - Content (Digest)</span></td><td>Bengaluru-VTP, India</td><td>Content &amp; Social Media<br><span class="muted">Bengaluru</span></td><td><b>Content &amp; Social Media</b><br><span class="muted">Pan-India / Multiple</span></td><td>Multi-city listing ("Bengaluru / Hyderabad / Pune"): LLM picked primary HQ city, human reviewer labeled "Pan-India / Multiple".</td></tr><tr><td><b>#34</b></td><td><b>Druva</b><br><span class="muted">Software Engineer (Associate / Fresher Track)</span></td><td>Hyderabad, Andhra Pradesh, India</td><td>Software Engineering<br><span class="muted">Hyderabad</span></td><td><b>Data Science &amp; AI/ML</b><br><span class="muted">Hyderabad</span></td><td>Backend title on AI team: LLM tagged "Backend &amp; Cloud/DevOps", human reviewer labeled "Data Science &amp; AI/ML" due to PyTorch/vector DB description.</td></tr><tr><td><b>#42</b></td><td><b>Airbnb India</b><br><span class="muted">Analyst, Advanced Analytics - Gurugram</span></td><td>Gurugram, India</td><td>Finance &amp; Analyst<br><span class="muted">Delhi NCR</span></td><td><b>Marketing &amp; Growth</b><br><span class="muted">Remote (India)</span></td><td>Role combines creator reels + paid ads growth ("Content &amp; Social Media" vs "Marketing &amp; Growth") and description states WFH for first 3 months.</td></tr>
   </table>
 
-  <h2>7. Key Engineering Challenges Resolved (Demonstrated Live in Video)</h2>
+  <h2>7. Key Engineering Challenges Resolved</h2>
   <ol>
     <li><b>Zero-Refresh Real-Time Student Feed:</b> Server-Sent Events (<code>/api/stream</code>) + cross-tab <code>localStorage</code> listeners display a clickable toast and smoothly inject newly published recruiter jobs as students scroll down &mdash; preserving scroll position without a refresh.</li>
     <li><b>Location Field Priority &amp; 150+ Neighborhood Aliases:</b> Fixed cases where description boilerplate (e.g., a Pune HQ address) overrode explicit Mumbai suburbs (<i>Borivali</i>, <i>Andheri</i>) and added <i>International / Global</i> mapping.</li>
     <li><b>Gemini Model Upgrade &amp; Token Cost Optimization:</b> Migrated from deprecated <code>2.5-flash-lite</code> to <code>gemini-3.1-flash-lite</code> with compact 10-job JSON batches, verified live at 98 input + 47 output tokens/job (<b>Rs. 8.94</b> standard / <b>Rs. 4.47</b> Batch API per 1,000 jobs).</li>
     <li><b>Serverless Deployment &amp; Strict Fresher Guardrails:</b> Bundled static JSON configs/data into Vercel via static TS imports + <code>vercel.json</code> rewrites, enforced Senior/Manager title rejection pre-AI and on submit, and passed <b>13/13</b> automated tests (<code>npm test</code>).</li>
   </ol>
+
+  <h2>8. Live Application Screenshots &amp; Visual Proof</h2>
+  
+      <div class="shot-card">
+        <div class="shot-caption">1. Role-Isolated Login Portal with 1-Click Demo Access (Student, Recruiter &amp; Single Admin)</div>
+        <img src="/screenshots/01-login-portal.png" alt="1. Role-Isolated Login Portal with 1-Click Demo Access (Student, Recruiter &amp; Single Admin)" />
+      </div>
+
+      <div class="shot-card">
+        <div class="shot-caption">2. Student Portal: 300+ Verified India Fresher &amp; Internship Jobs with Role &amp; City Filters</div>
+        <img src="/screenshots/02-student-feed.png" alt="2. Student Portal: 300+ Verified India Fresher &amp; Internship Jobs with Role &amp; City Filters" />
+      </div>
+
+      <div class="shot-card">
+        <div class="shot-caption">3. Recruiter Studio: Live AI Tagging (Andheri -&gt; Mumbai) + 1-Click Apply Suggested Tags</div>
+        <img src="/screenshots/03-recruiter-ai-tags.png" alt="3. Recruiter Studio: Live AI Tagging (Andheri -&gt; Mumbai) + 1-Click Apply Suggested Tags" />
+      </div>
+
+      <div class="shot-card">
+        <div class="shot-caption">4. Admin Dashboard: 300 Unique Jobs, 93 Duplicates Removed, Cost Rs. 8.94/1k &amp; Sync History</div>
+        <img src="/screenshots/04-admin-sync-cost.png" alt="4. Admin Dashboard: 300 Unique Jobs, 93 Duplicates Removed, Cost Rs. 8.94/1k &amp; Sync History" />
+      </div>
+
+      <div class="shot-card">
+        <div class="shot-caption">5. 50-Job Hand-Checked Accuracy Audit: 94% Role, 96% City, 92% Combined &amp; CSV Exports</div>
+        <img src="/screenshots/05-eval-50-report.png" alt="5. 50-Job Hand-Checked Accuracy Audit: 94% Role, 96% City, 92% Combined &amp; CSV Exports" />
+      </div>
 
   <div class="footer-note">
     EventBeep (@beepcareers) Working Document &bull; Live App: https://eventbeep.vercel.app &bull; Video Walkthrough: https://www.loom.com/share/b84c8bb5b45244d5afb19656edb9b4bf
