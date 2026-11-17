@@ -2,73 +2,276 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>EventBeep (@beepcareers) — Working Doc</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventBeep (@beepcareers) — Gen AI &amp; Engineering Working Doc</title>
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; color: #171722; max-width: 960px; margin: 32px auto; line-height: 1.55; padding: 0 20px; }
-  h1 { font-size: 26px; border-bottom: 4px solid #FFE01B; padding-bottom: 8px; }
-  h2 { font-size: 19px; margin-top: 28px; color: #0F0F12; border-left: 5px solid #FFE01B; padding-left: 10px; }
-  h3 { font-size: 15px; margin-top: 18px; }
-  .banner { background: #FFFBE6; border: 2px solid #171722; border-radius: 8px; padding: 14px 18px; margin: 16px 0; }
-  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
-  th, td { border: 1px solid #D1D5DB; padding: 8px 10px; text-align: left; vertical-align: top; }
-  th { background: #171722; color: #FFE01B; font-weight: bold; }
-  tr:nth-child(even) { background: #F9FAFB; }
-  pre { background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 6px; padding: 12px; white-space: pre-wrap; font-size: 12px; font-family: Consolas, monospace; }
-  code { background: #F3F4F6; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  @page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: #171722;
+    background: #FFFFFF;
+    max-width: 960px;
+    margin: 28px auto;
+    line-height: 1.55;
+    padding: 0 22px;
+    font-size: 13.5px;
+  }
+  .doc-header {
+    background: #0F0F12;
+    color: #FFFFFF;
+    border-radius: 12px;
+    padding: 22px 26px;
+    border-bottom: 5px solid #FFE01B;
+    margin-bottom: 20px;
+  }
+  .doc-kicker {
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #FFE01B;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .doc-header h1 {
+    margin: 0 0 6px 0;
+    font-size: 23px;
+    line-height: 1.25;
+    color: #FFFFFF;
+  }
+  .doc-subtitle {
+    color: #D4D4E0;
+    font-size: 13px;
+    margin: 0;
+  }
+  .links-card {
+    background: #FFFBE6;
+    border: 2px solid #171722;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+  .links-grid {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .links-grid td {
+    border: none;
+    border-bottom: 1px solid #EAE6D3;
+    padding: 6px 8px;
+    font-size: 12.8px;
+  }
+  .links-grid tr:last-child td { border-bottom: none; }
+  .links-grid a { color: #1D4ED8; font-weight: 600; text-decoration: none; }
+  .kpi-strip {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 8px 0;
+    margin: 0 -8px 20px -8px;
+  }
+  .kpi-cell {
+    background: #F8FAFC;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 25%;
+    vertical-align: top;
+  }
+  .kpi-cell.highlight {
+    background: #FFE01B;
+    border-color: #171722;
+  }
+  .kpi-label {
+    font-family: Consolas, monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #475569;
+  }
+  .kpi-cell.highlight .kpi-label { color: #0F0F12; }
+  .kpi-val {
+    font-size: 19px;
+    font-weight: 800;
+    margin: 3px 0;
+    color: #0F0F12;
+  }
+  .kpi-sub { font-size: 11px; color: #475569; }
+  h2 {
+    font-size: 16.5px;
+    margin: 24px 0 10px 0;
+    color: #0F0F12;
+    border-left: 5px solid #FFE01B;
+    padding: 2px 0 2px 10px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 14px;
+    margin: 16px 0 8px 0;
+    color: #1E293B;
+    page-break-after: avoid;
+  }
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px 0;
+    font-size: 12.2px;
+  }
+  table.data-table th, table.data-table td {
+    border: 1px solid #CBD5E1;
+    padding: 7px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.data-table th {
+    background: #171722;
+    color: #FFE01B;
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  table.data-table tr:nth-child(even) { background: #F8FAFC; }
+  pre {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    border-left: 4px solid #4B5EFF;
+    border-radius: 6px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    font-size: 11.5px;
+    font-family: Consolas, monospace;
+    line-height: 1.45;
+    margin: 8px 0 14px 0;
+  }
+  code {
+    background: #F1F5F9;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11.8px;
+    font-family: Consolas, monospace;
+  }
+  .tag {
+    display: inline-block;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .muted { color: #64748B; font-size: 11.5px; }
+  ol, ul { margin: 8px 0 14px 20px; padding: 0; }
+  li { margin-bottom: 7px; }
+  .footer-note {
+    margin-top: 26px;
+    padding-top: 12px;
+    border-top: 1.5px solid #E2E8F0;
+    font-size: 11.5px;
+    color: #64748B;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
-  <h1>EventBeep (@beepcareers) — Working Doc: Data, AI Tools, Prompts &amp; Proof</h1>
-  <div class="banner">
-    <b>Live Web App:</b> <a href="https://eventbeep.vercel.app">https://eventbeep.vercel.app</a><br>
-    <b>GitHub Repository:</b> <a href="https://github.com/MohdAqibChauhan/EventBeep">https://github.com/MohdAqibChauhan/EventBeep</a><br>
-    <b>Raw &amp; Tagged Dataset (300 Jobs):</b> <code>data/all_200_plus_jobs.csv</code><br>
-    <b>50-Job Hand-Checked Accuracy Audit CSV:</b> <code>data/hand_checked_50_posts.csv</code><br>
-    <b>Google Sheet Link (Imported CSVs):</b> [PASTE GOOGLE SHEET LINK HERE]<br>
-    <b>5-Minute Walkthrough Video Link:</b> [PASTE LOOM / DRIVE VIDEO LINK HERE]
+  <div class="doc-header">
+    <div class="doc-kicker">Beep Gen AI &amp; Engineering Submission &bull; Working Document</div>
+    <h1>EventBeep (@beepcareers) &mdash; AI-Tagged India Fresher &amp; Internship Job Radar</h1>
+    <p class="doc-subtitle">Complete Research Findings, Raw Datasets, AI Tooling, Production Prompts, 50-Job Accuracy Audit &amp; Live Proof</p>
   </div>
 
-  <h2>1. Default Demo Login Credentials (Also 1-Click Auto-Fill on Login Page)</h2>
-  <table>
-    <tr><th>Portal Role</th><th>Email ID</th><th>Password</th><th>Capabilities Verified</th></tr>
-    <tr><td><b>Student / User</b></td><td><code>student@eventbeep.com</code></td><td><code>student123</code></td><td>Filter 300+ fresher &amp; internship jobs across 14 roles &amp; 15 cities, save jobs, 1-click Apply on Beep, suggest tag edits, zero-refresh live scroll job updates</td></tr>
-    <tr><td><b>Recruiter</b></td><td><code>recruiter@eventbeep.com</code></td><td><code>recruiter123</code></td><td>Post fresher/internship jobs (external website optional), AI preview + 1-click Apply Suggested Tags, block senior/duplicate posts, view full student contact &amp; resume directory</td></tr>
-    <tr><td><b>Admin (Only 1 Admin)</b></td><td><code>admin@eventbeep.com</code></td><td><code>admin123</code></td><td>Monitor daily sync runs &amp; run AI cost, inspect 3-layer removed duplicates, audit 50-job accuracy report &amp; export CSVs, approve/dismiss student tag edits</td></tr>
+  <div class="links-card">
+    <table class="links-grid">
+      <tr>
+        <td style="width:230px;"><b>5-Minute Walkthrough Video (Loom):</b></td>
+        <td><a href="https://www.loom.com/share/b84c8bb5b45244d5afb19656edb9b4bf" target="_blank" rel="noopener noreferrer">https://www.loom.com/share/b84c8bb5b45244d5afb19656edb9b4bf</a></td>
+      </tr>
+      <tr>
+        <td><b>Live Deployed Web App (Vercel):</b></td>
+        <td><a href="https://eventbeep.vercel.app" target="_blank" rel="noopener noreferrer">https://eventbeep.vercel.app</a></td>
+      </tr>
+      <tr>
+        <td><b>Public GitHub Repository:</b></td>
+        <td><a href="https://github.com/MohdAqibChauhan/EventBeep" target="_blank" rel="noopener noreferrer">https://github.com/MohdAqibChauhan/EventBeep</a></td>
+      </tr>
+      <tr>
+        <td><b>Raw &amp; Tagged Dataset (300 Jobs):</b></td>
+        <td><a href="https://eventbeep.vercel.app/all_200_plus_jobs.csv" target="_blank" rel="noopener noreferrer">https://eventbeep.vercel.app/all_200_plus_jobs.csv</a> (<code>data/all_200_plus_jobs.csv</code>)</td>
+      </tr>
+      <tr>
+        <td><b>50-Job Accuracy Audit CSV:</b></td>
+        <td><a href="https://eventbeep.vercel.app/hand_checked_50_posts.csv" target="_blank" rel="noopener noreferrer">https://eventbeep.vercel.app/hand_checked_50_posts.csv</a> (<code>data/hand_checked_50_posts.csv</code>)</td>
+      </tr>
+    </table>
+  </div>
+
+  <table class="kpi-strip">
+    <tr>
+      <td class="kpi-cell highlight">
+        <div class="kpi-label">Unique Live Jobs</div>
+        <div class="kpi-val">300</div>
+        <div class="kpi-sub">390 scanned &bull; 23 active sources &bull; 0 senior roles</div>
+      </td>
+      <td class="kpi-cell">
+        <div class="kpi-label">Duplicates Removed</div>
+        <div class="kpi-val">93 (23.8%)</div>
+        <div class="kpi-sub">22 URL &bull; 53 Entity Hash &bull; 18 Fuzzy (&ge;84%)</div>
+      </td>
+      <td class="kpi-cell">
+        <div class="kpi-label">50-Job AI Accuracy</div>
+        <div class="kpi-val">94% / 96%</div>
+        <div class="kpi-sub">Role: 47/50 &bull; City: 48/50 &bull; Combined: 92%</div>
+      </td>
+      <td class="kpi-cell">
+        <div class="kpi-label">Cost / 1,000 Posts</div>
+        <div class="kpi-val">Rs. 8.94</div>
+        <div class="kpi-sub">$0.095 Standard &bull; Rs. 4.47 Batch API &bull; Rs. 0 Free</div>
+      </td>
+    </tr>
+  </table>
+
+  <h2>1. Live Demo Portal Credentials (1-Click Auto-Fill Available on Login Page)</h2>
+  <table class="data-table">
+    <tr><th>Portal Role</th><th>Email ID</th><th>Password</th><th>Key Verified Capabilities</th></tr>
+    <tr><td><b>Student / User</b></td><td><code>student@eventbeep.com</code></td><td><code>student123</code></td><td>Filter 300+ verified fresher/intern jobs by 14 roles &amp; 15 locations, bookmark jobs, 1-click Apply on Beep, suggest tag edits, zero-refresh live scroll job injection</td></tr>
+    <tr><td><b>Recruiter</b></td><td><code>recruiter@eventbeep.com</code></td><td><code>recruiter123</code></td><td>Post fresher/intern jobs in 60s (optional external URL), AI preview + 1-click Apply Suggested Tags, block senior/duplicate posts, view full student contact &amp; resume directory</td></tr>
+    <tr><td><b>Admin (Only 1 Admin)</b></td><td><code>admin@eventbeep.com</code></td><td><code>admin123</code></td><td>Monitor daily 6 AM IST sync runs &amp; proportional AI run cost, inspect 3-layer deduplication logs, audit 50-job accuracy sheet &amp; export CSVs, approve/dismiss tag suggestions</td></tr>
   </table>
 
   <h2>2. Top 3 Research Findings &amp; Why They Matter</h2>
   <ol>
-    <li><b>23.8% of raw aggregated listings (93 of 390) are cross-board duplicates or tracking-URL clones:</b> Collected across 20 Greenhouse India boards, Remotive API, Jobicy API, and HN Algolia API. Removing duplicates across Canonical URL (22), Normalized SHA-256 Entity Hash (53), and Fuzzy Similarity &gt;= 84% (18) <i>before</i> calling Gemini cuts LLM costs by ~24%.</li>
-    <li><b>Indian neighborhood names and boilerplate HQ addresses break naive city filters:</b> Startups list micro-localities (<i>Baner</i>, <i>Hinjewadi Phase 2</i>, <i>Borivali</i>, <i>Andheri</i>, <i>Koramangala</i>, <i>Gurugram</i>) or HQ addresses in descriptions. Prioritizing <code>location_raw</code> and mapping 150+ sub-localities + <code>International / Global</code> lifted city accuracy to <b>96.0% (48/50)</b>.</li>
-    <li><b>ATS feeds leak Senior roles, and startups without websites need direct applicant contact:</b> Filtering Senior/Principal/Manager roles pre-AI keeps the feed 100% fresher-focused, compact 10-job batching on Gemini 3.1 Flash-Lite lowers paid cost to <b>Rs. 8.94 ($0.095) per 1,000 posts</b> (or <b>Rs. 4.47</b> via Batch API), and Direct Apply + live scroll injection lets startups collect student contacts immediately.</li>
+    <li><b>Nearly 1 in 4 aggregated listings (23.8% &mdash; 93 of 390 raw posts) are cross-board duplicates or tracking-URL clones:</b> Collected across 20 official public Greenhouse India career boards, Remotive Public API, Jobicy Public API, and HN Algolia API. Removing duplicates across Canonical URL (22), Normalized SHA-256 Entity Hash (53), and Fuzzy Similarity &ge; 84% (18) <i>before</i> calling Gemini cuts LLM costs by ~24% and prevents feed spam.</li>
+    <li><b>Indian neighborhood names and boilerplate HQ addresses break naive city filters:</b> Startups regularly list sub-localities (<i>Baner</i>, <i>Hinjewadi Phase 2</i>, <i>Borivali</i>, <i>Andheri</i>, <i>Koramangala</i>, <i>Gurugram</i>) or mention HQ addresses inside job descriptions. Enforcing strict priority on <code>location_raw</code> and mapping 150+ neighborhoods + <code>International / Global</code> raised city normalization accuracy to <b>96.0% (48/50)</b>.</li>
+    <li><b>Public ATS feeds leak Senior roles, and early-stage startups need direct applicant contacts:</b> Filtering Senior/Staff/Principal/Manager roles pre-AI keeps the feed 100% fresher-focused, compact 10-job batching on Gemini 3.1 Flash-Lite reduces paid tagging cost to <b>Rs. 8.94 ($0.095) per 1,000 posts</b> (<b>Rs. 4.47</b> via Batch API; <b>Rs. 0</b> on Free Tier), and optional external URLs + Direct Apply + live scroll injection let startups without websites hire immediately.</li>
   </ol>
 
-  <h2>3. Raw Data Sources &amp; Dataset Breakdown (300 Unique Live Jobs)</h2>
-  <table>
-    <tr><th>Metric</th><th>Measured Value</th></tr>
-    <tr><td>Total Raw Posts Scanned</td><td>390</td></tr>
-    <tr><td>Duplicates Removed Across 3 Layers</td><td>93 (Canonical URL: 22 | SHA-256 Entity Hash: 53 | Fuzzy Match: 18)</td></tr>
-    <tr><td>Unique Live Fresher/Internship Jobs</td><td>300 (across 23 active sources; 0 Senior/Manager titles)</td></tr>
-    <tr><td>Top Cities in Dataset</td><td>Bengaluru (154), Remote India (46), Delhi NCR (36), Pune (33), Chennai (10), Mumbai (10), Hyderabad (6), Chandigarh (4), Pan-India (1)</td></tr>
-    <tr><td>Top Roles in Dataset</td><td>Software Engineering (99), Data Science &amp; AI/ML (47), Operations &amp; Strategy (42), Finance &amp; Analyst (36), BD &amp; Sales (28), Backend &amp; Cloud/DevOps (22)</td></tr>
+  <h2>3. Raw Data Sources &amp; Verified Dataset Breakdown (300 Unique Live Jobs)</h2>
+  <table class="data-table">
+    <tr><th>Source Category / Board</th><th>Unique Jobs</th><th>Role &amp; City Distribution Across 300 Active Jobs</th></tr>
+    <tr><td>Greenhouse Official India Boards (20 companies: Rubrik 26, Stripe 26, Zscaler 22, MongoDB 22, PubMatic 20, Elastic 18, Toast 18, Razorpay 16, Okta 16, Databricks 16, Airbnb 12, Agoda 11, Twilio 11, Groww 9, Druva 9, Coinbase 8, Deliveroo 5, Anthropic 4, Figma 2)</td><td><b>271</b></td><td rowspan="4"><b>Top Cities:</b> Bengaluru (154), Remote India (46), Delhi NCR (36), Pune (33), Chennai (10), Mumbai (10), Hyderabad (6), Chandigarh (4), Pan-India (1)<br><br><b>Top Roles:</b> Software Engineering (99), Data Science &amp; AI/ML (47), Operations &amp; Strategy (42), Finance &amp; Analyst (36), Business Development &amp; Sales (28), Backend &amp; Cloud/DevOps (22), Marketing &amp; Growth (6), Content &amp; Social Media (6), HR &amp; Talent (6), Mobile Dev (3), Product Design (2), Frontend Dev (2), Product Management (1)</td></tr>
+    <tr><td>Jobicy Public API (<code>jobicy.com/api/v2/remote-jobs</code>)</td><td><b>12</b></td></tr>
+    <tr><td>Remotive Public API (<code>remotive.com/api/remote-jobs</code>)</td><td><b>9</b></td></tr>
+    <tr><td>EventBeep Direct Recruiter (6) + HN Algolia Public API (2)</td><td><b>8</b></td></tr>
   </table>
 
-  <h3>Sample Cross-Board Duplicates Caught &amp; Removed (First 15 of 93)</h3>
-  <table>
+  <h3>Sample Cross-Board Duplicates Caught &amp; Removed (First 12 of 93)</h3>
+  <table class="data-table">
     <tr><th>#</th><th>Dropped Duplicate</th><th>Source</th><th>Detection Layer</th><th>Match</th><th>Kept Original</th></tr>
-    <tr><td>#1</td><td><b>Razorpay</b> — Product I — Intern / Trainee Track</td><td>Greenhouse API (Razorpay)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #16</td></tr><tr><td>#2</td><td><b>Razorpay</b> — Product I - Ads — Intern / Trainee Track</td><td>Greenhouse API (Razorpay)</td><td>Layer 3: Fuzzy Token Similarity</td><td>93%</td><td>Job #16</td></tr><tr><td>#3</td><td><b>Razorpay</b> — Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #19</td></tr><tr><td>#4</td><td><b>Razorpay</b> — Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #19</td></tr><tr><td>#5</td><td><b>Razorpay</b> — Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #19</td></tr><tr><td>#6</td><td><b>Druva</b> — Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Druva)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #32</td></tr><tr><td>#7</td><td><b>Druva</b> — Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Druva)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #32</td></tr><tr><td>#8</td><td><b>Toast India</b> — Software Engineer – Java Full Stack (Associate / Fresher Track)</td><td>Greenhouse API (Toast India)</td><td>Layer 3: Fuzzy Token Similarity</td><td>92%</td><td>Job #78</td></tr><tr><td>#9</td><td><b>Toast India</b> — Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Toast India)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #72</td></tr><tr><td>#10</td><td><b>Toast India</b> — I, Software Engineering — Intern / Trainee Track</td><td>Greenhouse API (Toast India)</td><td>Layer 3: Fuzzy Token Similarity</td><td>86%</td><td>Job #81</td></tr><tr><td>#11</td><td><b>Toast India</b> — Associate, Customer Care — Intern / Trainee Track</td><td>Greenhouse API (Toast India)</td><td>Layer 3: Fuzzy Token Similarity</td><td>92%</td><td>Job #83</td></tr><tr><td>#12</td><td><b>Zscaler</b> — Software Development Engineer - QA + Networking (Associate / Fresher Track)</td><td>Greenhouse API (Zscaler)</td><td>Layer 3: Fuzzy Token Similarity</td><td>84%</td><td>Job #113</td></tr><tr><td>#13</td><td><b>Zscaler</b> — Software Development Engineer - Rust — Intern / Trainee Track</td><td>Greenhouse API (Zscaler)</td><td>Layer 2: SHA-256 Entity Hash</td><td>98%</td><td>Job #115</td></tr><tr><td>#14</td><td><b>Zscaler</b> — Product Support Engineer I - Cloud — Intern / Trainee Track</td><td>Greenhouse API (Zscaler)</td><td>Layer 3: Fuzzy Token Similarity</td><td>93%</td><td>Job #117</td></tr><tr><td>#15</td><td><b>Zscaler</b> — Product Support Engineer I - ZIA/ZPA — Intern / Trainee Track</td><td>Greenhouse API (Zscaler)</td><td>Layer 3: Fuzzy Token Similarity</td><td>93%</td><td>Job #117</td></tr>
+    <tr><td>#1</td><td><b>Razorpay</b> &mdash; Product I — Intern / Trainee Track</td><td>Greenhouse API (Razorpay)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #16</td></tr><tr><td>#2</td><td><b>Razorpay</b> &mdash; Product I - Ads — Intern / Trainee Track</td><td>Greenhouse API (Razorpay)</td><td><span class="tag">Layer 3: Fuzzy Token Similarity</span></td><td><b>93%</b></td><td>Job #16</td></tr><tr><td>#3</td><td><b>Razorpay</b> &mdash; Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #19</td></tr><tr><td>#4</td><td><b>Razorpay</b> &mdash; Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #19</td></tr><tr><td>#5</td><td><b>Razorpay</b> &mdash; Product Associate (Associate / Fresher Track)</td><td>Greenhouse API (Razorpay)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #19</td></tr><tr><td>#6</td><td><b>Druva</b> &mdash; Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Druva)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #32</td></tr><tr><td>#7</td><td><b>Druva</b> &mdash; Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Druva)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #32</td></tr><tr><td>#8</td><td><b>Toast India</b> &mdash; Software Engineer – Java Full Stack (Associate / Fresher Track)</td><td>Greenhouse API (Toast India)</td><td><span class="tag">Layer 3: Fuzzy Token Similarity</span></td><td><b>92%</b></td><td>Job #78</td></tr><tr><td>#9</td><td><b>Toast India</b> &mdash; Software Engineer (Associate / Fresher Track)</td><td>Greenhouse API (Toast India)</td><td><span class="tag">Layer 2: SHA-256 Entity Hash</span></td><td><b>98%</b></td><td>Job #72</td></tr><tr><td>#10</td><td><b>Toast India</b> &mdash; I, Software Engineering — Intern / Trainee Track</td><td>Greenhouse API (Toast India)</td><td><span class="tag">Layer 3: Fuzzy Token Similarity</span></td><td><b>86%</b></td><td>Job #81</td></tr><tr><td>#11</td><td><b>Toast India</b> &mdash; Associate, Customer Care — Intern / Trainee Track</td><td>Greenhouse API (Toast India)</td><td><span class="tag">Layer 3: Fuzzy Token Similarity</span></td><td><b>92%</b></td><td>Job #83</td></tr><tr><td>#12</td><td><b>Zscaler</b> &mdash; Software Development Engineer - QA + Networking (Associate / Fresher Track)</td><td>Greenhouse API (Zscaler)</td><td><span class="tag">Layer 3: Fuzzy Token Similarity</span></td><td><b>84%</b></td><td>Job #113</td></tr>
   </table>
 
-  <h2>4. AI Tools &amp; Tech Stack</h2>
-  <ul>
-    <li><b>AI / LLM Tagging:</b> Google Gemini 3.1 Flash-Lite (<code>gemini-3.1-flash-lite</code>, <code>responseMimeType: "application/json"</code>, temperature 0.1), Python 3 worker (<code>tagger/tag_jobs.py</code>), <code>config/taxonomy.json</code> (150+ neighborhood aliases).</li>
-    <li><b>Backend:</b> Node.js, TypeScript, Express.js, JWT + bcryptjs, node-cron (daily 06:00 AM IST sync), Cheerio, Server-Sent Events (<code>/api/stream</code>).</li>
-    <li><b>Frontend:</b> HTML5, CSS3, Vanilla JS (ES2022) with SSE + localStorage scroll-triggered card injection and reload persistence.</li>
-    <li><b>Database &amp; Hosting:</b> PostgreSQL schema + Dual-Sync JSON store, Vercel Serverless + GitHub. Automated tests: 13/13 passing (<code>npm test</code>).</li>
-  </ul>
+  <h2>4. AI Tools, Tech Stack &amp; Architecture</h2>
+  <table class="data-table">
+    <tr><th>Layer</th><th>Stack &amp; Tools Used</th><th>Implementation Files</th></tr>
+    <tr><td><b>AI / LLM Tagging</b></td><td>Google Gemini 3.1 Flash-Lite (<code>gemini-3.1-flash-lite</code>, JSON mode, temp 0.1), Python 3 worker, 150+ sub-locality &amp; role rules</td><td><code>tagger/tag_jobs.py</code>, <code>tagger/evaluate.py</code>, <code>config/taxonomy.json</code></td></tr>
+    <tr><td><b>Backend &amp; Collectors</b></td><td>Node.js, TypeScript, Express.js, JWT + bcryptjs, <code>node-cron</code> (daily 06:00 AM IST sync), Cheerio, SSE (<code>/api/stream</code>)</td><td><code>server/index.ts</code>, <code>server/collectors.ts</code>, <code>server/dedupe.ts</code></td></tr>
+    <tr><td><b>Frontend SPA</b></td><td>HTML5, CSS3 (Neo-Brutalist <code>@beepcareers</code> theme), Vanilla JS (ES2022) with zero-refresh scroll injection &amp; reload persistence</td><td><code>public/index.html</code>, <code>public/styles.css</code>, <code>public/app.js</code></td></tr>
+    <tr><td><b>Storage, Cloud &amp; QA</b></td><td>PostgreSQL schema + Dual-Sync JSON store + client seed fallback, GitHub + Vercel Serverless, 13/13 Automated Tests (<code>npm test</code>)</td><td><code>db/schema.sql</code>, <code>server/db.ts</code>, <code>vercel.json</code>, <code>server/test-suite.ts</code></td></tr>
+  </table>
 
-  <h2>5. Exact AI Prompts Used</h2>
-  <h3>Prompt A — Full Single-Job Taxonomy Prompt (<code>tagger/tag_jobs.py</code>)</h3>
+  <h2>5. Exact Prompts Used in Production</h2>
+  <h3>Prompt A &mdash; Single-Job Preview &amp; Reasoning (<code>tagger/tag_jobs.py</code> &rarr; <code>SYSTEM_PROMPT</code>)</h3>
   <pre>You are Beep's Senior Career Taxonomy LLM.
 Given a batch of Indian fresher / college internship job postings, classify each job into:
 1. role_tag: MUST be one of 14 canonical roles (Software Engineering, Frontend &amp; Web Dev, Backend &amp; Cloud/DevOps, Data Science &amp; AI/ML, Mobile Development, Product Design (UI/UX), Product Management, Marketing &amp; Growth, Business Development &amp; Sales, Operations &amp; Strategy, Content &amp; Social Media, Finance &amp; Analyst, HR &amp; Talent, QA &amp; Testing).
@@ -83,25 +286,37 @@ Given a batch of Indian fresher / college internship job postings, classify each
    - Always prioritize location_raw over description boilerplate.
 3. confidence (0.75-0.99), is_fresher (boolean), reasoning (1 sentence). Return ONLY valid JSON.</pre>
 
-  <h3>Prompt B — Compact 10-Job Batch Prompt (Bulk Sync Optimization)</h3>
+  <h3>Prompt B &mdash; Compact 10-Job Batch Prompt (<code>tagger/tag_jobs.py</code> &rarr; <code>call_gemini_batch</code>)</h3>
   <pre>Tag Indian fresher/internship jobs into role_tag and city. Map Baner/Hinjewadi-&gt;Pune, Borivali/Andheri/Powai-&gt;Mumbai, HSR/Koramangala-&gt;Bengaluru, Gurugram/Noida-&gt;Delhi NCR. Return JSON array of {id, role_tag, city, confidence} only.</pre>
 
-  <h2>6. 50-Post Hand-Checked Accuracy &amp; Real Cost per 1,000 Posts</h2>
-  <table>
-    <tr><th>Metric</th><th>Verified Result</th><th>Real Token &amp; Cost Breakdown (Gemini 3.1 Flash-Lite @ Rs. 94.10/$)</th></tr>
-    <tr><td><b>Role Tagging Accuracy</b></td><td><b>94.0% (47/50)</b></td><td>Measured Input: 98 tokens/job (98,000 / 1k @ $0.25/1M = $0.0245)</td></tr>
-    <tr><td><b>City Normalization Accuracy</b></td><td><b>96.0% (48/50)</b></td><td>Measured Output: 47 tokens/job (47,000 / 1k @ $1.50/1M = $0.0705)</td></tr>
-    <tr><td><b>Combined Exact Match</b></td><td><b>92.0% (46/50)</b></td><td><b>Standard Paid Cost / 1,000 Posts: $0.0950 (Rs. 8.94)</b></td></tr>
-    <tr><td><b>Actual Dev/Demo Spend</b></td><td><b>Rs. 0.00 (Free Tier)</b></td><td><b>Overnight Batch API (50% off): $0.0475 (Rs. 4.47) / 1,000 Posts</b></td></tr>
+  <h3>Prompt C &mdash; Express Single-Job Fallback Prompt (<code>server/index.ts</code> &rarr; <code>callPythonSingleTagger</code>)</h3>
+  <pre>Classify this Indian fresher/internship job into role_tag (14 canonical roles) and city (15 canonical locations). Always prioritize location_raw over description when determining city (e.g. Borivali/Andheri/Powai -&gt; Mumbai, Baner/Hinjewadi -&gt; Pune, Koramangala/HSR -&gt; Bengaluru). Return JSON with keys role_tag, city, confidence, reasoning.</pre>
+
+  <h2>6. 50-Post Hand-Checked Accuracy Audit &amp; Verified Cost per 1,000 Posts</h2>
+  <table class="data-table">
+    <tr><th>Metric</th><th>Verified Result</th><th>Real Token &amp; Cost Calculation (Gemini 3.1 Flash-Lite @ Rs. 94.10/$1)</th></tr>
+    <tr><td><b>Role Tagging Accuracy</b></td><td><b>94.0% (47 / 50)</b></td><td>Measured Input: <b>98 tokens/job</b> &rarr; 98,000 tokens / 1k @ $0.25/1M = <b>$0.0245 (Rs. 2.31)</b></td></tr>
+    <tr><td><b>City Normalization Accuracy</b></td><td><b>96.0% (48 / 50)</b></td><td>Measured Output: <b>47 tokens/job</b> &rarr; 47,000 tokens / 1k @ $1.50/1M = <b>$0.0705 (Rs. 6.63)</b></td></tr>
+    <tr><td><b>Combined Exact Match</b></td><td><b>92.0% (46 / 50)</b></td><td><b>Standard Paid Cost / 1,000 Posts: $0.0950 (Rs. 8.94 INR)</b></td></tr>
+    <tr><td><b>Actual Dev / Demo Spend</b></td><td><b>Rs. 0.00 (Free Tier)</b></td><td><b>Overnight Batch API (50% off): $0.0475 (Rs. 4.47 INR) / 1,000 Posts</b></td></tr>
   </table>
 
-  <h3>All 4 Discrepancies in the 50-Job Manual Audit</h3>
-  <table>
-    <tr><th>Sample</th><th>Company &amp; Title</th><th>Location</th><th>LLM Tag</th><th>Human Label</th><th>Error Analysis</th></tr>
-    <tr><td>#11</td><td><b>Razorpay</b><br>Security Engineer (Associate / Fresher Track)</td><td>Bengaluru</td><td>Software Engineering / Bengaluru</td><td><b>Product Management</b> / <b>Bengaluru</b></td><td>Ambiguous hybrid title with PRD/roadmap duties: LLM tagged "Operations &amp; Strategy", human reviewer labeled "Product Management". Fixed by adding APM/PRD weighting in prompt v2.</td></tr><tr><td>#23</td><td><b>Groww</b><br>Associate - Content (Digest)</td><td>Bengaluru-VTP, India</td><td>Content &amp; Social Media / Bengaluru</td><td><b>Content &amp; Social Media</b> / <b>Pan-India / Multiple</b></td><td>Multi-city listing ("Bengaluru / Hyderabad / Pune"): LLM picked primary HQ city, human reviewer labeled "Pan-India / Multiple".</td></tr><tr><td>#34</td><td><b>Druva</b><br>Software Engineer (Associate / Fresher Track)</td><td>Hyderabad, Andhra Pradesh, India</td><td>Software Engineering / Hyderabad</td><td><b>Data Science &amp; AI/ML</b> / <b>Hyderabad</b></td><td>Backend title on AI team: LLM tagged "Backend &amp; Cloud/DevOps", human reviewer labeled "Data Science &amp; AI/ML" due to PyTorch/vector DB description.</td></tr><tr><td>#42</td><td><b>Airbnb India</b><br>Analyst, Advanced Analytics - Gurugram</td><td>Gurugram, India</td><td>Finance &amp; Analyst / Delhi NCR</td><td><b>Marketing &amp; Growth</b> / <b>Remote (India)</b></td><td>Role combines creator reels + paid ads growth ("Content &amp; Social Media" vs "Marketing &amp; Growth") and description states WFH for first 3 months.</td></tr>
+  <h3>All 4 Audited Discrepancies (Full 50-Row Sheet in <code>data/hand_checked_50_posts.csv</code>)</h3>
+  <table class="data-table">
+    <tr><th>Sample</th><th>Company &amp; Title</th><th>Raw Location</th><th>AI Tag</th><th>Human Ground-Truth</th><th>Root Cause &amp; Resolution</th></tr>
+    <tr><td><b>#11</b></td><td><b>Razorpay</b><br><span class="muted">Security Engineer (Associate / Fresher Track)</span></td><td>Bengaluru</td><td>Software Engineering<br><span class="muted">Bengaluru</span></td><td><b>Product Management</b><br><span class="muted">Bengaluru</span></td><td>Ambiguous hybrid title with PRD/roadmap duties: LLM tagged "Operations &amp; Strategy", human reviewer labeled "Product Management". Fixed by adding APM/PRD weighting in prompt v2.</td></tr><tr><td><b>#23</b></td><td><b>Groww</b><br><span class="muted">Associate - Content (Digest)</span></td><td>Bengaluru-VTP, India</td><td>Content &amp; Social Media<br><span class="muted">Bengaluru</span></td><td><b>Content &amp; Social Media</b><br><span class="muted">Pan-India / Multiple</span></td><td>Multi-city listing ("Bengaluru / Hyderabad / Pune"): LLM picked primary HQ city, human reviewer labeled "Pan-India / Multiple".</td></tr><tr><td><b>#34</b></td><td><b>Druva</b><br><span class="muted">Software Engineer (Associate / Fresher Track)</span></td><td>Hyderabad, Andhra Pradesh, India</td><td>Software Engineering<br><span class="muted">Hyderabad</span></td><td><b>Data Science &amp; AI/ML</b><br><span class="muted">Hyderabad</span></td><td>Backend title on AI team: LLM tagged "Backend &amp; Cloud/DevOps", human reviewer labeled "Data Science &amp; AI/ML" due to PyTorch/vector DB description.</td></tr><tr><td><b>#42</b></td><td><b>Airbnb India</b><br><span class="muted">Analyst, Advanced Analytics - Gurugram</span></td><td>Gurugram, India</td><td>Finance &amp; Analyst<br><span class="muted">Delhi NCR</span></td><td><b>Marketing &amp; Growth</b><br><span class="muted">Remote (India)</span></td><td>Role combines creator reels + paid ads growth ("Content &amp; Social Media" vs "Marketing &amp; Growth") and description states WFH for first 3 months.</td></tr>
   </table>
 
-  <h2>7. Screenshots &amp; Video Proof</h2>
-  <p><i>(Paste screenshots of Login Screen, Student Portal + Live Scroll Toast, Recruiter Studio + Student Contact Directory, Admin 50-Job Audit + Dedupe Logs, and Google Sheet CSVs below before sharing.)</i></p>
+  <h2>7. Key Engineering Challenges Resolved (Demonstrated Live in Video)</h2>
+  <ol>
+    <li><b>Zero-Refresh Real-Time Student Feed:</b> Server-Sent Events (<code>/api/stream</code>) + cross-tab <code>localStorage</code> listeners display a clickable toast and smoothly inject newly published recruiter jobs as students scroll down &mdash; preserving scroll position without a refresh.</li>
+    <li><b>Location Field Priority &amp; 150+ Neighborhood Aliases:</b> Fixed cases where description boilerplate (e.g., a Pune HQ address) overrode explicit Mumbai suburbs (<i>Borivali</i>, <i>Andheri</i>) and added <i>International / Global</i> mapping.</li>
+    <li><b>Gemini Model Upgrade &amp; Token Cost Optimization:</b> Migrated from deprecated <code>2.5-flash-lite</code> to <code>gemini-3.1-flash-lite</code> with compact 10-job JSON batches, verified live at 98 input + 47 output tokens/job (<b>Rs. 8.94</b> standard / <b>Rs. 4.47</b> Batch API per 1,000 jobs).</li>
+    <li><b>Serverless Deployment &amp; Strict Fresher Guardrails:</b> Bundled static JSON configs/data into Vercel via static TS imports + <code>vercel.json</code> rewrites, enforced Senior/Manager title rejection pre-AI and on submit, and passed <b>13/13</b> automated tests (<code>npm test</code>).</li>
+  </ol>
+
+  <div class="footer-note">
+    EventBeep (@beepcareers) Working Document &bull; Live App: https://eventbeep.vercel.app &bull; Video Walkthrough: https://www.loom.com/share/b84c8bb5b45244d5afb19656edb9b4bf
+  </div>
 </body>
 </html>
