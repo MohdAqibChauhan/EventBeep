@@ -193,6 +193,77 @@
     color: #64748B;
     text-align: center;
   }
+  @media (max-width: 768px) {
+    body {
+      margin: 14px auto;
+      padding: 0 14px;
+      font-size: 13px;
+      overflow-x: hidden;
+    }
+    .doc-header {
+      padding: 16px 16px;
+    }
+    .doc-header h1 {
+      font-size: 19px;
+    }
+    .links-grid,
+    .links-grid tbody,
+    .links-grid tr,
+    .links-grid td {
+      display: block;
+      width: 100% !important;
+    }
+    .links-grid td {
+      padding: 4px 0;
+      border-bottom: none;
+      word-break: break-word;
+    }
+    .links-grid tr {
+      border-bottom: 1px solid #EAE6D3;
+      padding: 6px 0;
+    }
+    .links-grid tr:last-child {
+      border-bottom: none;
+    }
+    .kpi-strip {
+      border-spacing: 0;
+      margin: 0 0 16px 0;
+    }
+    .kpi-strip tbody,
+    .kpi-strip tr {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+    }
+    .kpi-cell {
+      display: block;
+      width: 100%;
+    }
+    table.data-table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+    }
+    pre {
+      overflow-x: auto;
+      font-size: 11px;
+    }
+  }
+  @media (max-width: 480px) {
+    .kpi-strip tbody,
+    .kpi-strip tr {
+      grid-template-columns: 1fr;
+    }
+    .doc-header h1 {
+      font-size: 17px;
+    }
+    .shot-caption {
+      font-size: 10.5px;
+      padding: 7px 10px;
+    }
+  }
 </style>
 </head>
 <body>

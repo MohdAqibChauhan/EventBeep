@@ -2270,8 +2270,8 @@ async function previewLlmTagging() {
   const safeCity = escapeHtml(finalCity).replace(/'/g, "\\'");
 
   box.innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-      <div style="flex:1; min-width:260px;">
+    <div class="rec-preview-flex">
+      <div style="flex:1; min-width:0;">
         <div style="font-family:var(--font-mono); font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#555;">
           ✨ AI SUGGESTED TAGS FOR YOUR JOB POST
         </div>
@@ -2280,11 +2280,11 @@ async function previewLlmTagging() {
           <span class="tag-city-dark">📍 City: ${escapeHtml(finalCity)}</span>
           <span class="tag-conf">✓ ${Math.round((data.confidence || 0.95) * 100)}% Match Confidence</span>
         </div>
-        <div style="font-size:0.84rem; margin-top:7px; color:#333;">
+        <div style="font-size:0.84rem; margin-top:7px; color:#333; word-break:break-word;">
           <strong>Why this match:</strong> ${escapeHtml(cleanReason)}
         </div>
       </div>
-      <div id="applied-tags-status" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <div id="applied-tags-status" class="rec-preview-actions">
         <button type="button" class="btn-flag-tag" style="background:#FFFFFF; border:2px solid #171722; font-weight:800; padding:8px 14px;" onclick="applySuggestedTags('${safeRole}', '${safeCity}')">
           ✓ Apply Suggested Tags
         </button>

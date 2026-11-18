@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Beep Careers (@beepcareers) — Fresher & Internship Jobs in India</title>
   <link rel="icon" type="image/svg+xml" href="/beep-logo.svg" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=7" />
 </head>
 <body data-active-role="user">
 
@@ -104,43 +104,43 @@
           </button>
         </form>
 
-        <div style="margin-top:14px; padding:12px 14px; background:#FFFBE6; border:2px solid #171722; border-radius:12px;">
-          <div style="font-family:var(--font-mono); font-size:0.7rem; font-weight:700; text-transform:uppercase; color:#171722; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+        <div class="demo-access-box">
+          <div class="demo-access-title">
             <span>🔑 Demo Portal Access (Click Use to Auto-Fill)</span>
           </div>
-          <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:0.75rem;">
+          <div class="demo-access-scroll">
+            <table class="demo-access-table">
               <thead>
-                <tr style="border-bottom:1.5px solid #D6D3C4; text-align:left; color:#555; font-family:var(--font-mono); font-size:0.66rem;">
-                  <th style="padding:4px 4px;">PORTAL ROLE</th>
-                  <th style="padding:4px 4px;">EMAIL ID</th>
-                  <th style="padding:4px 4px;">PASSWORD</th>
-                  <th style="padding:4px 4px; text-align:right;">ACTION</th>
+                <tr>
+                  <th>PORTAL ROLE</th>
+                  <th>EMAIL ID</th>
+                  <th>PASSWORD</th>
+                  <th style="text-align:right;">ACTION</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style="border-bottom:1px solid #EAE7D8;">
-                  <td style="padding:6px 4px; font-weight:700; white-space:nowrap;">🎓 Student / User</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">student@eventbeep.com</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">student123</td>
-                  <td style="padding:6px 4px; text-align:right;">
-                    <button type="button" class="btn-flag-tag" style="padding:3px 9px; font-size:0.7rem; font-weight:800; background:#fff;" onclick="fillDemoCredentials('user', 'student@eventbeep.com', 'student123')">Use →</button>
-                  </td>
-                </tr>
-                <tr style="border-bottom:1px solid #EAE7D8;">
-                  <td style="padding:6px 4px; font-weight:700; white-space:nowrap;">💼 Recruiter</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">recruiter@eventbeep.com</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">recruiter123</td>
-                  <td style="padding:6px 4px; text-align:right;">
-                    <button type="button" class="btn-flag-tag" style="padding:3px 9px; font-size:0.7rem; font-weight:800; background:#fff;" onclick="fillDemoCredentials('recruiter', 'recruiter@eventbeep.com', 'recruiter123')">Use →</button>
+                <tr>
+                  <td data-label="Role" class="demo-role-cell">🎓 Student / User</td>
+                  <td data-label="Email" class="demo-mono-cell">student@eventbeep.com</td>
+                  <td data-label="Password" class="demo-mono-cell">student123</td>
+                  <td data-label="Action" class="demo-action-cell">
+                    <button type="button" class="btn-flag-tag demo-use-btn" onclick="fillDemoCredentials('user', 'student@eventbeep.com', 'student123')">Use →</button>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:6px 4px; font-weight:700; white-space:nowrap;">🛡️ Admin (Only 1 Admin)</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">admin@eventbeep.com</td>
-                  <td style="padding:6px 4px; font-family:var(--font-mono);">admin123</td>
-                  <td style="padding:6px 4px; text-align:right;">
-                    <button type="button" class="btn-flag-tag" style="padding:3px 9px; font-size:0.7rem; font-weight:800; background:#fff;" onclick="fillDemoCredentials('admin', 'admin@eventbeep.com', 'admin123')">Use →</button>
+                  <td data-label="Role" class="demo-role-cell">💼 Recruiter</td>
+                  <td data-label="Email" class="demo-mono-cell">recruiter@eventbeep.com</td>
+                  <td data-label="Password" class="demo-mono-cell">recruiter123</td>
+                  <td data-label="Action" class="demo-action-cell">
+                    <button type="button" class="btn-flag-tag demo-use-btn" onclick="fillDemoCredentials('recruiter', 'recruiter@eventbeep.com', 'recruiter123')">Use →</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td data-label="Role" class="demo-role-cell">🛡️ Admin (Only 1 Admin)</td>
+                  <td data-label="Email" class="demo-mono-cell">admin@eventbeep.com</td>
+                  <td data-label="Password" class="demo-mono-cell">admin123</td>
+                  <td data-label="Action" class="demo-action-cell">
+                    <button type="button" class="btn-flag-tag demo-use-btn" onclick="fillDemoCredentials('admin', 'admin@eventbeep.com', 'admin123')">Use →</button>
                   </td>
                 </tr>
               </tbody>
@@ -148,7 +148,7 @@
           </div>
         </div>
 
-        <div style="margin-top:16px; padding-top:14px; border-top:1.5px solid #E5E4DC; display:flex; justify-content:space-between; align-items:center; font-size:0.78rem;">
+        <div class="login-register-bar">
           <span style="color:#555; font-weight:600;">New to Beep? Create a Student or Recruiter account.</span>
           <button type="button" class="btn-flag-tag" onclick="toggleRegisterMode()" id="toggle-reg-btn">
             ➕ Create New Account
@@ -480,7 +480,7 @@
                 See how many students have viewed and applied to your active job listings.
               </p>
             </div>
-            <div style="display:flex; gap:10px;">
+            <div class="section-header-actions">
               <button class="btn-ig-blue" onclick="switchTab('recruiter-applicants')">
                 👥 View Student Applicants
               </button>
@@ -828,9 +828,9 @@ Given a batch of Indian fresher / college internship job postings, classify each
     </div>
   </div>
 
-  <div id="action-feedback-toast" class="hidden" style="position:fixed; bottom:24px; right:24px; z-index:9999; background:#171722; color:#FFE01B; border:2px solid #FFE01B; border-radius:12px; padding:12px 18px; font-weight:800; font-size:0.86rem; box-shadow:0 8px 24px rgba(0,0,0,0.35);"></div>
+  <div id="action-feedback-toast" class="action-feedback-toast hidden"></div>
 
-  <script src="/seed-data.js?v=6"></script>
-  <script src="/app.js?v=6"></script>
+  <script src="/seed-data.js?v=7"></script>
+  <script src="/app.js?v=7"></script>
 </body>
 </html>
